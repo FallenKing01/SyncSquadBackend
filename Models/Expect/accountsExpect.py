@@ -1,8 +1,21 @@
 from flask_restx import fields
 from Domain.extensions import api
 
-accountExpect = api.model('AccountExpect', {
+accountStudentExpect= api.model('AccountExpect', {
     "nume": fields.String,
-    "prenume" : fields.String,
-    "password" : fields.String,
+    "email": fields.String,
+    "parola" : fields.String,
+    "telefon" : fields.String,
+    "facultatea" : fields.String,
+    "specializarea" : fields.String,
+    "idGrupa" : fields.String,
+})
+
+
+accountProfesorExpect = api.model('AccountExpect', {
+    "nume": fields.String,
+    "email": fields.String,
+    "parola" : fields.String,
+    "telefon" : fields.String,
+    "departament" : fields.String,
 })

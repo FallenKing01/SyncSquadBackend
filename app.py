@@ -10,7 +10,7 @@ app.config['JWT_SECRET_KEY'] = 'cookiemonster'
 jwt = JWTManager(app)
 api.init_app(app)
 CORS(app)
-api.add_namespace(nsUser, path="/user")
+api.add_namespace(nsUser)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,15 +1,13 @@
 import pyodbc
 
-
-# Database connection details
-server = "ip4c.database.windows.net"
+# Updated database connection details
+server = "syncsquad.database.windows.net"
 port = 1433
-user = "stud"
-password = "Andrei2002"  # Replace with your actual password
-database = "ip4c"
+user = "student"
+password = "Suceava2024"  # Replace with your actual password
+database = "ipsync"
 
 def dbInit():
-
     # Build connection string
     conn_string = (
         f"Driver={{ODBC Driver 17 for SQL Server}};"
