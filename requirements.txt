@@ -7,3 +7,4 @@ Flask-RESTPlus==0.13.0
 flask_cors==4.0.0
 pyodbc
 bcrypt==4.2.0
+SQLAlchemy==2.0.36

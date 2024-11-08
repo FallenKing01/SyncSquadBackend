@@ -24,7 +24,7 @@ class createStudent(Resource):
 
 @nsUser.route("/createprofesor")
 class createProfesor(Resource):
-    @nsUser.expect(accountStudentExpect)
+    @nsUser.expect(accountProfesorExpect)
     def post(self):
 
         try:
@@ -53,7 +53,7 @@ class createSecretar(Resource):
             abort(500, "Something went wrong")
 
 
-@nsUser.route("/")
+@nsUser.route("")
 class getUsersFromDb(Resource):
     def get(self):
 

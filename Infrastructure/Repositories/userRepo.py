@@ -1,152 +1,131 @@
-from Domain.dbInit import dbInit
 import uuid
 from Domain.Entities.student import Student
 from Domain.Entities.utilizator import Utilizator
 from Domain.Entities.profesor import Profesor
 from Domain.Entities.secretar import Secretar
 from Utils.passwordhash import hash_password
-from Utils.sqlcommands import add_row
+from Domain.extensions import sesion
+
 def create_student_repo(user_data):
 
     user_id = str(uuid.uuid4())
-    cnxn, cursor = dbInit()
 
-    if cnxn and cursor:
+    try:
+        # Hash the password and set the user ID
+        user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
+        user_data['id'] = user_id
 
-        try:
+        # Create instances of Utilizator and Student
+        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'student')
+        student = Student(user_data['id'], user_data['nume'], user_data['telefon'],
+                          user_data['facultatea'], user_data['specializarea'], user_data['idGrupa'], False)
 
-                user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
-                user_data['id'] = user_id
+        # Add instances to the session
+        sesion.add(utilizator)
+        sesion.add(student)
 
-                utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'] , 'student')
-                student = Student(user_data['id'], user_data['nume'], user_data['telefon'], user_data['facultatea'], user_data['specializarea'], user_data['idGrupa'],False)
+        # Commit the transaction
+        sesion.commit()
 
-                add_row(cursor, "Utilizatori", utilizator)
-                add_row(cursor, "Studenti", student)
+        return {"message": "Student created successfully"}, 201
 
-                return {"message": "Student created successfully"}, 201
+    except Exception as e:
+        # Rollback the session in case of any exception
+        sesion.rollback()
 
+        if "email" in str(e).lower() and "unique" in str(e).lower():
 
-        except Exception as e:
+            return {
+                "error": "Email already exists. Please use a different email."}, 409  # 409 Conflict HTTP status code
 
-            print(f"Error while inserting user: {e}")  # Better error logging
-            raise Exception(f"Error while inserting user: {str(e)}")
+        print(f"Error while inserting user: {e}")
+        raise Exception(f"Error while inserting user: {str(e)}")
 
-        finally:
-            cursor.close()
-            cnxn.close()
-
-    else:
-
-        raise Exception("Error: Database connection not established.")
 
 def create_profesor_repo(user_data):
-
+    """Create a professor entry in the database using the SQLAlchemy session."""
     user_id = str(uuid.uuid4())
-    cnxn, cursor = dbInit()
+    user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
+    user_data['id'] = user_id
 
-    if cnxn and cursor:
+    try:
+        # Create and add the user entry with 'profesor' role
+        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'profesor')
+        sesion.add(utilizator)
 
-        try:
+        # Create and add the professor-specific entry
+        profesor = Profesor(user_data['id'], user_data['nume'], user_data['telefon'], user_data['departament'])
+        sesion.add(profesor)
 
-                user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
-                user_data['id'] = user_id
+        # Commit the transaction
+        sesion.commit()
+        return {"message": "Profesor created successfully"}, 201
 
-                utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'] , 'profesor')
-                add_row(cursor, "Utilizatori", utilizator)
+    except Exception as e:
+        # Rollback in case of any exception
+        sesion.rollback()
 
-                profesor = Profesor(user_data['id'], user_data['nume'], user_data['telefon'], user_data['departament'])
-                add_row(cursor, "Profesori", profesor)
+        # Check for unique email constraint violation
+        if "email" in str(e).lower() and "unique" in str(e).lower():
+            return {"error": "Email already exists. Please use a different email."}, 409
 
-                return {"message": "Profesor created successfully"}, 201
-
-
-
-        except Exception as e:
-
-            print(f"Error while inserting user: {e}")
-
-            return {"error": str(e)}, 400
-
-        finally:
-
-            cursor.close()
-            cnxn.close()
-
-    else:
-
-        raise Exception("Error: Database connection not established.")
+        # Log and re-raise generic exception
+        print(f"Error while inserting professor: {e}")
+        raise Exception(f"Error while inserting professor: {str(e)}")
 
 def create_secretar_repo(user_data):
-
+    """Create a secretary entry in the database using the SQLAlchemy session."""
     user_id = str(uuid.uuid4())
-    cnxn, cursor = dbInit()
+    user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
+    user_data['id'] = user_id
 
-    if cnxn and cursor:
+    try:
+        # Create and add the user entry with 'secretar' role
+        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'secretar')
+        sesion.add(utilizator)
 
-        try:
+        # Create and add the secretary-specific entry
+        secretar = Secretar(user_data['id'], user_data['nume'], user_data['telefon'])
+        sesion.add(secretar)
 
-                user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
-                user_data['id'] = user_id
+        # Commit the transaction
+        sesion.commit()
+        return {"message": "Secretar created successfully"}, 201
 
-                utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'] , 'secretar')
-                add_row(cursor, "Utilizatori", utilizator)
+    except Exception as e:
+        # Rollback in case of any exception
+        sesion.rollback()
 
-                secretar = Secretar(user_data['id'], user_data['nume'], user_data['telefon'])
-                add_row(cursor, "Secretari", secretar)
+        # Check for unique email constraint violation
+        if "email" in str(e).lower() and "unique" in str(e).lower():
+            return {"error": "Email already exists. Please use a different email."}, 409
 
-                return {"message": "Secretar created successfully"}, 201
-
-
-
-        except Exception as e:
-
-            print(f"Error while inserting user: {e}")
-
-            return {"error": str(e)}, 400
-
-        finally:
-
-            cursor.close()
-            cnxn.close()
-
-    else:
-
-        raise Exception("Error: Database connection not established.")
-
+        # Log and re-raise generic exception
+        print(f"Error while inserting secretary: {e}")
+        raise Exception(f"Error while inserting secretary: {str(e)}")
 
 def get_users_repo():
-    cnxn, cursor = dbInit()
+    """Retrieve a list of students from the database using the SQLAlchemy session."""
+    try:
+        # Query all students
+        students = sesion.query(Student).all()
 
-    if cnxn and cursor:
-        try:
-            cursor.execute("SELECT * FROM Studenti")
-            user_data = cursor.fetchall()
+        # Convert each Student instance to a dictionary
+        users_list = []
+        for student in students:
+            user_dict = {
+                "id": student.id,
+                "nume": student.nume,
+                "telefon": student.telefon,
+                "facultatea": student.facultatea,
+                "specializarea": student.specializarea,
+                "idgrupa": student.idgrupa,
+                "sef": student.sef
+            }
+            users_list.append(user_dict)
 
-            # List to hold user dictionaries
-            users_list = []
+        return users_list
 
-            # Convert each tuple to a dictionary with appropriate keys
-            for row in user_data:
-                user_dict = {
-                    "id": str(row[0]),
-                    "nume": row[1],
-                    "telefon": row[2],
-                    "facultatea": row[3],
-                    "specializarea": row[4],
-                    "id_grupa": row[5],
-                    "sef": row[6]
-                }
-                users_list.append(user_dict)
-
-            return users_list
-
-        except Exception as e:
-            raise Exception(f"Error while fetching users: {str(e)}")
-
-        finally:
-            cursor.close()
-            cnxn.close()
-
-    else:
-        raise Exception("Error: Database connection not established.")
+    except Exception as e:
+        print(f"Error while fetching users: {e}")
+        raise Exception(f"Error while fetching users: {str(e)}")
