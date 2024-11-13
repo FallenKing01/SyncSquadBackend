@@ -1,8 +1,8 @@
 from Infrastructure.Repositories.studentRepo import *
 from flask_restx import Namespace, Resource
 from flask_restx import abort
-
-nsStudent = Namespace("student", description="Student related operations")
+from Domain.extensions import authorizations,api
+nsStudent = Namespace("student", description="Student related operations",authorizations=authorizations)
 
 
 @nsStudent.route("/promovare/<string:studentId>")

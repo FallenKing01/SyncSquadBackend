@@ -4,6 +4,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import JWTManager
+
+jwt = JWTManager()
+
+authorizations = {
+    "jsonWebToken": {"type": "apiKey", "in": "header", "name": "Authorization"}
+}
 
 url_object = URL.create(
     drivername="mssql+pyodbc",

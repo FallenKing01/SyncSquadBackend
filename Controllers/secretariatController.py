@@ -1,10 +1,10 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
 from Models.Expect.createGrupaExpect import *
-from Domain.extensions import api
+from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.secretariatRepo import *
 
-nsSecretariat = Namespace("secretariat", description="Secretariat related operations")
+nsSecretariat = Namespace("secretariat", description="Secretariat related operations",authorizations=authorizations)
 
 @nsSecretariat.route("/grupa")
 class create_group(Resource):

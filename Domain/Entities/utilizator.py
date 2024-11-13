@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String
 class Utilizator(Base):
 
     __tablename__ = 'Utilizatori'
+
     id = Column(String, primary_key=True)
     email = Column(String)
     parola = Column(String)

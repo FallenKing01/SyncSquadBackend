@@ -99,6 +99,7 @@ def get_users_repo():
         students = session.query(Student).all()
 
         users_list = []
+
         for student in students:
             user_dict = {
                 "id": student.id,
@@ -109,10 +110,27 @@ def get_users_repo():
                 "idgrupa": student.idgrupa,
                 "sef": student.sef
             }
+
             users_list.append(user_dict)
 
         return users_list
 
     except Exception as e:
-        print(f"Error while fetching users: {e}")
+
         raise Exception(f"Error while fetching users: {str(e)}")
+
+def get_user_by_id_repo(id):
+
+    try:
+
+        user = session.query(Utilizator).filter(Utilizator.id == id).first()
+
+        if user is None:
+
+            raise Exception("User not found", 404)
+
+        return user
+
+    except Exception as e:
+
+        raise Exception(f"Error while fetching user: {str(e)}")
