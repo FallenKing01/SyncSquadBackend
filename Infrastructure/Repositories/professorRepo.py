@@ -1,7 +1,7 @@
 import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
-from Domain.Entities.asistenti import Asistenti
+from Domain.Entities.asistent import Asistenti
 from Domain.extensions import session
 def add_profesor_repo(profesor_data):
 

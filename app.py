@@ -9,6 +9,8 @@ from Controllers.professorsController import nsProfessor
 from Controllers.secretariatController import nsSecretariat
 from Controllers.materiiController import nsMaterii
 from Controllers.asistentiController import nsAsistenti
+from Controllers.saliController import nsSali
+from Controllers.examenController import nsExamen
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'cookiemonster'
 jwt = JWTManager(app)
@@ -20,6 +22,8 @@ api.add_namespace(nsProfessor)
 api.add_namespace(nsSecretariat)
 api.add_namespace(nsMaterii)
 api.add_namespace(nsAsistenti)
+api.add_namespace(nsSali)
+api.add_namespace(nsExamen)
 
 if __name__ == "__main__":
     app.run(debug=True)
