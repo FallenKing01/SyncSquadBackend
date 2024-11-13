@@ -7,7 +7,7 @@ from Infrastructure.Repositories.userRepo import *
 
 
 nsUser = Namespace("user", description="User related operations")
-@nsUser.route("/createstudent")
+@nsUser.route("/student")
 class createStudent(Resource):
     @nsUser.expect(accountStudentExpect)
     def post(self):
@@ -22,7 +22,7 @@ class createStudent(Resource):
 
             abort(500, "Something went wrong")
 
-@nsUser.route("/createprofesor")
+@nsUser.route("/profesor")
 class createProfesor(Resource):
     @nsUser.expect(accountProfesorExpect)
     def post(self):
@@ -37,9 +37,9 @@ class createProfesor(Resource):
 
             abort(500, "Something went wrong")
 
-@nsUser.route("/createsecretar")
+@nsUser.route("/secretar")
 class createSecretar(Resource):
-    @nsUser.expect(accountStudentExpect)
+    @nsUser.expect(accountSecretarExpect)
     def post(self):
 
         try:
