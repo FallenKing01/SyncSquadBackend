@@ -49,12 +49,20 @@ def get_sali_from_department_repo(departament_name):
 
 def delete_sala_repo(sala_id):
     try:
+
         sala = session.query(Sali).filter(Sali.id == sala_id).first()
+
         if sala is None:
+
             raise Exception(f"Sala not found")
+
         session.delete(sala)
         session.commit()
+
         return {"message": "Sala  stearsa cu succes!" }
+
     except Exception as e:
+
         session.rollback()
+        
         raise Exception(f"Error while getting sali: {str(e)}")

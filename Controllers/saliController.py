@@ -43,9 +43,14 @@ class getSaliFromDepartment(Resource):
 @nsSali.route("/<string:sala_id>")
 class deleteSala(Resource):
     def delete(self, sala_id):
+
         try:
+
             message = delete_sala_repo(sala_id)
+
             return message
+
         except Exception:
+
             abort(500, "Something went wrong")
 
