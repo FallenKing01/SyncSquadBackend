@@ -8,7 +8,7 @@ accountStudentExpect= api.model('CreateStudent', {
     "telefon" : fields.String,
     "facultatea" : fields.String,
     "specializarea" : fields.String,
-    "idGrupa" : fields.String,
+    "idgrupa" : fields.String,
 })
 
 
@@ -18,4 +18,11 @@ accountProfesorExpect = api.model('AccountExpect', {
     "parola" : fields.String,
     "telefon" : fields.String,
     "departament" : fields.String,
+})
+
+accountSecretarExpect = api.model('AccountExpect', {
+    "email": fields.String,
+    "parola": fields.String,
+    "nume": fields.String,
+    "telefon" : fields.String,
 })

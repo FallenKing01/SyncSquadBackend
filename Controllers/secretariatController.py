@@ -6,7 +6,7 @@ from Infrastructure.Repositories.secretariatRepo import *
 
 nsSecretariat = Namespace("secretariat", description="Secretariat related operations")
 
-@nsSecretariat.route("/creategroup")
+@nsSecretariat.route("/grupa")
 class create_group(Resource):
     @nsSecretariat.expect(createGrupaExpect)
     def post(self):
@@ -21,7 +21,7 @@ class create_group(Resource):
 
             abort(500, "Something went wrong")
 
-@nsSecretariat.route("/getstudentsfromgroup/<string:grupaId>")
+@nsSecretariat.route("/studentidingrupa/<string:grupaId>")
 class get_students_from_group(Resource):
     def get(self, grupaId):
 

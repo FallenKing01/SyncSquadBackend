@@ -3,9 +3,16 @@ from Domain.Entities.grupa import Grupe
 from Domain.Entities.student import Student
 from Domain.extensions import session
 from sqlalchemy.exc import IntegrityError
+from Domain.Entities.secretar import Secretar
 
+def add_secretar_repo(secretar_data):
 
+    secretar = Secretar(secretar_data['id'], secretar_data['nume'], secretar_data['telefon'])
+    session.add(secretar)
+def add_grupa_repo(grupa_data):
 
+    grupa = Grupe(grupa_data['id'], grupa_data['grupa'])
+    session.add(grupa)
 
 def create_grupa_repo(grupa_data):
 
@@ -15,9 +22,8 @@ def create_grupa_repo(grupa_data):
 
         grupa_data['id'] = grupa_id
 
-        grupa = Grupe(grupa_data['id'],grupa_data['grupa'])
+        add_grupa_repo(grupa_data)
 
-        session.add(grupa)
         session.commit()
 
         return {"message": "Group created successfully"}, 201
@@ -25,7 +31,9 @@ def create_grupa_repo(grupa_data):
     except IntegrityError as e:
 
         session.rollback()
+
         if "unique key" in str(e).lower():
+
             return {"message": "A group with this name already exists."}, 409
 
 
@@ -36,6 +44,7 @@ def create_grupa_repo(grupa_data):
         return {"message": f"An error occurred while creating the group: {e}"}, 500
 
 def get_students_of_group_repo(grupaId):
+
     try:
 
         students = session.query(Student).filter(Student.idgrupa == grupaId).all()
@@ -45,8 +54,6 @@ def get_students_of_group_repo(grupaId):
         if not students:
 
             return students_list, 404
-
-
 
         for student in students:
 
@@ -64,5 +71,5 @@ def get_students_of_group_repo(grupaId):
         return students_list
 
     except Exception as e:
-        print(f"Error while fetching students: {e}")
+
         return {"message": f"An error occurred while fetching students: {e}"}, 500

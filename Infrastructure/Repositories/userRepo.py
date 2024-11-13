@@ -1,10 +1,17 @@
 import uuid
 from Domain.Entities.student import Student
 from Domain.Entities.utilizator import Utilizator
-from Domain.Entities.profesor import Profesor
-from Domain.Entities.secretar import Secretar
 from Utils.passwordhash import hash_password
 from Domain.extensions import session
+from Infrastructure.Repositories.professorRepo import add_profesor_repo
+from Infrastructure.Repositories.secretariatRepo import add_secretar_repo
+from Infrastructure.Repositories.studentRepo import add_student_repo
+from Utils.enums.role import Role
+
+def add_utilizator_repo(user_data):
+
+        user = Utilizator(user_data['id'], user_data['email'], user_data['parola'], user_data['rol'])
+        session.add(user)
 
 def create_student_repo(user_data):
 
@@ -14,13 +21,10 @@ def create_student_repo(user_data):
 
         user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
         user_data['id'] = user_id
+        user_data['rol'] = Role.STUDENT.name.lower()
 
-        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'student')
-        student = Student(user_data['id'], user_data['nume'], user_data['telefon'],
-                          user_data['facultatea'], user_data['specializarea'], user_data['idGrupa'], False)
-
-        session.add(utilizator)
-        session.add(student)
+        add_utilizator_repo(user_data)
+        add_student_repo(user_data)
 
         session.commit()
 
@@ -44,14 +48,12 @@ def create_profesor_repo(user_data):
     user_id = str(uuid.uuid4())
     user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
     user_data['id'] = user_id
+    user_data['rol'] = Role.PROFESOR.name.lower()
 
     try:
 
-        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'profesor')
-        session.add(utilizator)
-
-        profesor = Profesor(user_data['id'], user_data['nume'], user_data['telefon'], user_data['departament'])
-        session.add(profesor)
+        add_utilizator_repo(user_data)
+        add_profesor_repo(user_data)
 
         session.commit()
         return {"message": "Profesor created successfully"}, 201
@@ -63,7 +65,6 @@ def create_profesor_repo(user_data):
         if "email" in str(e).lower() and "unique" in str(e).lower():
             return {"error": "Email already exists. Please use a different email."}, 409
 
-        print(f"Error while inserting professor: {e}")
         raise Exception(f"Error while inserting professor: {str(e)}")
 
 def create_secretar_repo(user_data):
@@ -71,14 +72,12 @@ def create_secretar_repo(user_data):
     user_id = str(uuid.uuid4())
     user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
     user_data['id'] = user_id
+    user_data['rol'] = Role.SECRETAR.name.lower()
 
     try:
 
-        utilizator = Utilizator(user_data['id'], user_data['email'], user_data['parola'], 'secretar')
-        session.add(utilizator)
-
-        secretar = Secretar(user_data['id'], user_data['nume'], user_data['telefon'])
-        session.add(secretar)
+        add_utilizator_repo(user_data)
+        add_secretar_repo(user_data)
 
         session.commit()
         return {"message": "Secretar created successfully"}, 201

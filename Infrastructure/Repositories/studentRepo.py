@@ -3,6 +3,12 @@ from Domain.Entities.student import Student
 from Domain.Entities.utilizator import Utilizator
 from Domain.Entities.profesor import Profesor
 from Utils.enums.role import Role
+
+def add_student_repo(student_data):
+
+    student = Student(student_data['id'], student_data['nume'], student_data['telefon'], student_data['facultatea'],student_data['specializarea'], student_data['idgrupa'], False)
+    session.add(student)
+
 def update_student(studentId):
 
     try:
@@ -31,25 +37,4 @@ def update_student(studentId):
         raise Exception(f"Error while updating student: {str(e)}")
 
 
-def get_profesori():
-
-    try:
-
-        profesori = session.query(Profesor).all()
-
-        profesori_list = []
-
-        for prof in profesori:
-
-            profesori_list.append({
-                "id": prof.id,
-                "nume": prof.nume,
-                "telefon": prof.telefon,
-                "departament": prof.departament
-            })
-
-        return profesori_list
-
-    except Exception as e:
-        raise Exception(f"Error while getting profesori: {str(e)}")
 

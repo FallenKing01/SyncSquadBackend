@@ -5,7 +5,7 @@ from flask_restx import abort
 nsStudent = Namespace("student", description="Student related operations")
 
 
-@nsStudent.route("/update/<string:studentId>")
+@nsStudent.route("/promovare/<string:studentId>")
 class updateStudent(Resource):
     def put(self, studentId):
 
@@ -19,17 +19,3 @@ class updateStudent(Resource):
 
             abort(500, "Something went wrong")
 
-@nsStudent.route("/profesori")
-class getProfesori(Resource):
-
-    def get(self):
-
-        try:
-
-            profesori = get_profesori()
-
-            return profesori
-
-        except Exception:
-
-            abort(500, "Something went wrong")
