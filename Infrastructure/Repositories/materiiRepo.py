@@ -63,3 +63,26 @@ def get_subjects_of_profesor_repo(profesorId):
     except Exception as e:
 
         raise Exception(f"Error while getting subjects of professor: {str(e)}")
+
+def delete_subject_repo(idMaterie):
+
+    try:
+
+         subject = session.query(Materii).filter(Materii.id == idMaterie).first()
+
+         if subject is None:
+
+                return {"error": "The subject does not exist"}, 404
+
+         session.delete(subject)
+         session.commit()
+
+         return {"message": "Subject deleted successfully"}, 200
+
+    except Exception as e:
+
+            session.rollback()
+
+            raise Exception(f"Error while deleting subject: {str(e)}")
+
+

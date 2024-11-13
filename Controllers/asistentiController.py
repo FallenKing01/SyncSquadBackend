@@ -1,10 +1,10 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
 from Models.Expect.materieExpect import *
-from Domain.extensions import api
+from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.asistentiRepo import *
 
-nsAsistenti = Namespace("asistenti", description="Asistenti related operations")
+nsAsistenti = Namespace("asistenti", description="Asistenti related operations",authorizations=authorizations)
 
 
 @nsAsistenti.route("/<string:titularId>/<string:asistentId>")

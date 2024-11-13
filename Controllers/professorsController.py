@@ -1,10 +1,10 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
 from Models.Expect.materieExpect import *
-from Domain.extensions import api
+from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.professorRepo import *
 
-nsProfessor = Namespace("profesor", description="Professor related operations")
+nsProfessor = Namespace("profesor", description="Professor related operations",authorizations=authorizations)
 
 
 @nsProfessor.route("")

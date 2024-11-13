@@ -1,12 +1,12 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
 from Models.Expect.accountsExpect import *
-from Domain.extensions import api
+from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.userRepo import *
 
 
 
-nsUser = Namespace("user", description="User related operations")
+nsUser = Namespace("user", description="User related operations" , authorizations=authorizations)
 @nsUser.route("/student")
 class createStudent(Resource):
     @nsUser.expect(accountStudentExpect)
@@ -64,3 +64,5 @@ class getUsersFromDb(Resource):
 
         except Exception as e:
             abort(404, str(e))
+
+

@@ -1,12 +1,16 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
-from Domain.extensions import api
+from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.saliRepo import *
 from Models.Expect.createSaliExpect import *
-nsSali = Namespace("sali", description="Sali related operations")
+from flask_jwt_extended import jwt_required
+
+nsSali = Namespace("sali", description="Sali related operations",authorizations=authorizations)
 
 @nsSali.route("")
 class createSala(Resource):
+    method_decorators = [jwt_required()]
+    @nsSali.doc(security="jsonWebToken")
     @nsSali.expect(createSali)
     def post(self):
 
