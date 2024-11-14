@@ -7,6 +7,8 @@ from Infrastructure.Repositories.professorRepo import add_profesor_repo
 from Infrastructure.Repositories.secretariatRepo import add_secretar_repo
 from Infrastructure.Repositories.studentRepo import add_student_repo
 from Utils.enums.role import Role
+from Domain.Entities.profesor import Profesor
+from Domain.Entities.secretar import Secretar
 
 def add_utilizator_repo(user_data):
 
@@ -91,6 +93,58 @@ def create_secretar_repo(user_data):
 
         print(f"Error while inserting secretary: {e}")
         raise Exception(f"Error while inserting secretary: {str(e)}")
+
+
+def get_info_user_repo(id):
+
+    try:
+
+        userData = session.query(Utilizator).filter(Utilizator.id == id).first()
+
+        if userData is None:
+
+            raise Exception("User not found", 404)
+
+        if userData.rol == Role.STUDENT.name.lower() or userData.rol == Role.SEF.name.lower():
+
+            studentData = session.query(Student).filter(Student.id == id).first()
+
+            return {
+                "id": studentData.id,
+                "nume": studentData.nume,
+                "telefon": studentData.telefon,
+                "facultatea": studentData.facultatea,
+                "specializarea": studentData.specializarea,
+                "idgrupa": studentData.idgrupa,
+                "sef": studentData.sef
+            }
+
+        if userData.rol == Role.PROFESOR.name.lower():
+
+                profesorData = session.query(Profesor).filter(Profesor.id == id).first()
+
+                return {
+                    "nume": profesorData.nume,
+                    "telefon": profesorData.telefon,
+                    "departament": profesorData.departament
+                }
+
+        if userData.rol == Role.SECRETAR.name.lower():
+
+            secretarData = session.query(Secretar).filter(Secretar.id == id).first()
+
+            return {
+                "nume": secretarData.nume,
+                "telefon": secretarData.telefon,
+            }
+
+    except Exception as e:
+
+        raise Exception(f"Error while fetching user: {str(e)}")
+
+
+
+
 
 def get_users_repo():
     """Retrieve a list of students from the database using the SQLAlchemy session."""

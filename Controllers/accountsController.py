@@ -52,6 +52,19 @@ class createSecretar(Resource):
 
             abort(500, "Something went wrong")
 
+@nsUser.route("/info/<string:id>")
+class getUserInfo(Resource):
+    def get(self, id):
+
+        try:
+
+            user_data = get_info_user_repo(id)
+
+            return user_data, 200
+
+        except Exception as e:
+            abort(404, str(e))
+
 
 @nsUser.route("")
 class getUsersFromDb(Resource):

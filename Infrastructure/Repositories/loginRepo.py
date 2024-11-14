@@ -27,7 +27,7 @@ def login_user(accountData):
 
         userData = {
             "id": user.id,
-            # "email": user.email,  # Commented out as per your code
+            "email": user.email,  # Commented out as per your code
             "rol": user.rol
         }
 
