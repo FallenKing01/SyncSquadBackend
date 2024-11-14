@@ -19,3 +19,14 @@ acceptProfesorExamene = api.model('Update Examene', {
 
 })
 
+updateExamen = api.model('Reprogrameaza examen', {
+    "id": fields.String(required=True, description="ID of the exam"),
+    "asistentid": fields.String(required=False, description="ID of the assistant for the exam"),
+    "orastart": fields.DateTime(required=False, description="Start time of the exam"),
+    "orafinal": fields.DateTime(required=False, description="End time of the exam"),
+    "actualizatde": fields.String(required=False, description="ID of the user who last updated the exam"),
+    "salaid": fields.String(required=True, description="ID of the room where the exam will take place"),
+    "data": fields.Date(required=False, description="Date of the exam"),
+    "sefid": fields.String(required=True, description="ID of the chief examiner"),
+})
+

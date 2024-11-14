@@ -35,3 +35,18 @@ class getExamen(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsExamen.route("")
+class updateExamen(Resource):
+    @nsExamen.expect(updateExamen)
+    def put(self):
+
+        try:
+
+            update_examen_repo(api.payload)
+
+            return {"message": "Examen updated successfully"}
+
+        except Exception:
+
+            abort(500, "Something went wrong")
