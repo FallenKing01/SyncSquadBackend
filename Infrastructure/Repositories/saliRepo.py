@@ -53,6 +53,9 @@ def get_sali_from_department_repo(departament_name):
 
 from datetime import datetime, timedelta
 
+from datetime import datetime, timedelta
+
+
 def get_liber_sala(sala_id, data_examen):
     # Define the working hours for the day
     work_start = datetime.strptime("08:00", "%H:%M")
@@ -62,18 +65,25 @@ def get_liber_sala(sala_id, data_examen):
     # Replace this with a database call in your actual setup
     exams = session.query(SaliCereri).filter(SaliCereri.idsala == sala_id).all()
 
+    # If there are no exams scheduled, return the default time slot
+    if not exams:
+        return [{
+            "ora_start": work_start.strftime("%H:%M"),
+            "ora_end": work_end.strftime("%H:%M")
+        }]
 
     scheduled_exams = []
     for exam in exams:
+        current_exam = session.query(Examene).filter(
+            Examene.id == exam.idcerere,
+            Examene.data == data_examen
+        ).first()
 
-        current_exam = session.query(Examene).filter(Examene.id == exam.idcerere).first()
-
-        scheduled_exams.append({
-            "ora_start": datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M"),
-            "ora_end": datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M")
-        })
-
-    print(scheduled_exams)
+        if current_exam:  # If a valid exam is found
+            scheduled_exams.append({
+                "ora_start": datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M"),
+                "ora_end": datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M")
+            })
 
     # Sort exams by start time in case they're out of order
     scheduled_exams.sort(key=lambda x: x["ora_start"])
