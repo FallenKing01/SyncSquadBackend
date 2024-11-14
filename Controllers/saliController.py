@@ -1,5 +1,7 @@
 from flask_restx import Namespace, Resource
 from flask_restx import abort
+from pyexpat.errors import messages
+
 from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.saliRepo import *
 from Models.Expect.createSaliExpect import *
@@ -51,3 +53,18 @@ class getLiberSala(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsSali.route("/<string:sala_id>")
+class deleteSala(Resource):
+    def delete(self, sala_id):
+
+        try:
+
+            message = delete_sala_repo(sala_id)
+
+            return message
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
