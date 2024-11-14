@@ -35,7 +35,7 @@ def login_user(accountData):
 
         return {
             "Authentication successful": create_access_token(
-                userData["id"],
+                identity=userData,
                 additional_claims=userData,
                 expires_delta=expires
             )
