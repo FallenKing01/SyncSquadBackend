@@ -37,3 +37,17 @@ class getSaliFromDepartment(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsSali.route("/<string:sala_id>/<string:data_examen>")
+class getLiberSala(Resource):
+    def get(self, sala_id, data_examen):
+
+        try:
+
+            liber = get_liber_sala(sala_id, data_examen)
+
+            return liber
+
+        except Exception:
+
+            abort(500, "Something went wrong")

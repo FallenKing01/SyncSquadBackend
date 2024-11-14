@@ -20,7 +20,7 @@ def create_subject_repo(subject_data):
 
         if profesor is None:
 
-            return {"error": "The professor does not exist"}, 404
+            return {"error": "The professor does not exist"}, 204
 
         subject_data['id'] = subject_id
         add_subject_repo(subject_data)
@@ -38,13 +38,15 @@ def create_subject_repo(subject_data):
 
 
 def get_subjects_of_profesor_repo(profesorId):
+
     try:
 
         subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
         subjects_list = []
 
         if not subjects:
-            return subjects_list, 404
+
+            return subjects_list, 204
 
         for subject in subjects:
 
@@ -72,7 +74,7 @@ def delete_subject_repo(idMaterie):
 
          if subject is None:
 
-                return {"error": "The subject does not exist"}, 404
+                return {"error": "The subject does not exist"}, 204
 
          session.delete(subject)
          session.commit()

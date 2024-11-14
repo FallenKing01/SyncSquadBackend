@@ -9,13 +9,13 @@ createStudentExamene = api.model('Create Examene', {
 })
 
 acceptProfesorExamene = api.model('Update Examene', {
-
-    "id": fields.String(required=True, description="ID of the professor in charge of the exam"),
+    "id": fields.String(required=True, description="ID of the exam"),
     "asistentid": fields.String(required=False, description="ID of the assistant for the exam"),
     "orastart": fields.DateTime(required=False, description="Start time of the exam"),
     "orafinal": fields.DateTime(required=False, description="End time of the exam"),
     "actualizatde": fields.String(required=False, description="ID of the user who last updated the exam"),
     "actualizatla": fields.Date(required=True, description="Date when the exam was last updated"),
+    "salaid": fields.String(required=True, description="ID of the room where the exam will take place"),
 
 })
 

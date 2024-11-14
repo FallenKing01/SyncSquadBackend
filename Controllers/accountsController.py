@@ -63,6 +63,7 @@ class getUserInfo(Resource):
             return user_data, 200
 
         except Exception as e:
+
             abort(404, str(e))
 
 
@@ -76,6 +77,7 @@ class getUsersFromDb(Resource):
             return user_data, 200
 
         except Exception as e:
+
             abort(404, str(e))
 
 
