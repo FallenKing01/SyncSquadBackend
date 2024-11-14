@@ -12,7 +12,7 @@ accountStudentExpect= api.model('CreateStudent', {
 })
 
 
-accountProfesorExpect = api.model('AccountExpect', {
+accountProfesorExpect = api.model('Account Expect Profesor', {
     "nume": fields.String,
     "email": fields.String,
     "parola" : fields.String,
