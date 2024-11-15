@@ -1,7 +1,6 @@
 import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
-from Domain.Entities.asistent import Asistenti
 from Domain.extensions import session
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
@@ -64,3 +63,6 @@ def accept_examen_by_profesor_repo(exam_data):
     except Exception as e:
 
         raise Exception(f"Error while accepting examen: {str(e)}")
+
+
+

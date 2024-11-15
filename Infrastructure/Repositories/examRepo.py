@@ -4,6 +4,8 @@ from Utils.enums.statusExam import Status
 from Domain.extensions import session
 from Domain.Entities.materie import Materii
 from datetime import datetime
+from Domain.Entities.utilizator import Utilizator
+from Domain.Entities.saliCereri import SaliCereri
 
 def add_examen_repo(exam_data):
 
@@ -73,3 +75,44 @@ def get_pending_exams_of_profesor_repo(profesorId):
 
     except Exception as e:
         raise Exception(f"Error while getting exams: {str(e)}")
+
+
+def update_examen_repo(examenData):
+    try:
+
+        examen = session.query(Examene).filter(Examene.id == examenData['id']).first()
+
+        if examen is None:
+
+            raise Exception(f"Examen with id {examenData['id']} not found.")
+
+        examen.orastart = examenData['orastart']
+        examen.orafinal = examenData['orafinal']
+        examen.actualizatde = examenData['actualizatde']
+        examen.actualizatla = datetime.utcnow()
+        examen.asistentid = examenData['asistentid']
+        examen.data = examenData['data']
+
+        update_salacere = session.query(SaliCereri).filter(SaliCereri.idcerere == examenData['id']).first()
+
+        if update_salacere:
+
+            update_salacere.idsala = examenData['salaid']
+
+        else:
+
+            raise Exception(f"SaliCereri entry with idcerere {examenData['id']} not found.")
+
+        session.flush()
+        session.commit()
+
+        student_data = session.query(Utilizator).filter(Utilizator.id == examenData['sefid']).first()
+
+        if student_data:
+            pass
+
+    except Exception as e:
+
+        session.rollback()
+
+        raise Exception(f"Error while updating examen: {str(e)}")
