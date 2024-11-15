@@ -88,7 +88,9 @@ def delete_subject_repo(idMaterie):
             raise Exception(f"Error while deleting subject: {str(e)}")
 
 def update_subject_repo(idMaterie, subject_data):
+
     try:
+
         # Găsește materia după ID
         subject = session.query(Materii).filter(Materii.id == idMaterie).first()
 
@@ -114,5 +116,7 @@ def update_subject_repo(idMaterie, subject_data):
         return {"message": "Subject updated successfully"}, 200
 
     except Exception as e:
+
         session.rollback()
+
         raise Exception(f"Error while updating subject: {str(e)}")
