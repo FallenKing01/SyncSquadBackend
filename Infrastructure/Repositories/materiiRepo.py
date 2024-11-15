@@ -87,4 +87,36 @@ def delete_subject_repo(idMaterie):
 
             raise Exception(f"Error while deleting subject: {str(e)}")
 
+def update_subject_repo(idMaterie, subject_data):
 
+    try:
+
+        # Găsește materia după ID
+        subject = session.query(Materii).filter(Materii.id == idMaterie).first()
+
+        if subject is None:
+            return {"error": "The subject does not exist"}, 204
+
+        # Verifică dacă profesorul există în baza de date
+        if 'profesorid' in subject_data:
+            profesor = session.query(Profesor).filter(Profesor.id == subject_data['profesorid']).first()
+            if profesor is None:
+                raise Exception(f"Profesor with ID {subject_data['profesorid']} does not exist")
+
+        # Actualizează câmpurile materiei
+        subject.nume = subject_data.get('nume', subject.nume)
+        subject.abreviere = subject_data.get('abreviere', subject.abreviere)
+        subject.tipevaluare = subject_data.get('tipevaluare', subject.tipevaluare)
+        subject.numarcredite = subject_data.get('numarcredite', subject.numarcredite)
+        subject.profesorid = subject_data.get('profesorid', subject.profesorid)
+
+        # Salvează modificările
+        session.commit()
+
+        return {"message": "Subject updated successfully"}, 200
+
+    except Exception as e:
+
+        session.rollback()
+
+        raise Exception(f"Error while updating subject: {str(e)}")

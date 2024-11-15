@@ -50,3 +50,17 @@ class delete_materie(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsMaterii.route("/<string:idMaterie>")
+class update_materie(Resource):
+    @nsMaterii.expect(materiiExpect)  # Validează payload-ul primit
+    def put(self, idMaterie):
+        try:
+            # Apelează funcția de actualizare din repository
+            message = update_subject_repo(idMaterie, api.payload)
+
+            return message
+
+        except Exception:
+
+            abort(500, "Something went wrong")
