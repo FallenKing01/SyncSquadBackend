@@ -6,7 +6,8 @@ from Domain.Entities.materie import Materii
 from datetime import datetime
 from Domain.Entities.utilizator import Utilizator
 from Domain.Entities.saliCereri import SaliCereri
-
+from Domain.Entities.student import Student
+from Domain.Entities.grupa import Grupe
 def add_examen_repo(exam_data):
 
 
@@ -36,6 +37,7 @@ def create_examen_repo(exam_data):
 from datetime import datetime, date
 
 def get_pending_exams_of_profesor_repo(profesorId):
+
     try:
         exams = session.query(Examene).filter(
             Examene.profesorid == profesorId,
@@ -43,7 +45,9 @@ def get_pending_exams_of_profesor_repo(profesorId):
         ).all()
 
         examList = []
+
         for exam in exams:
+
             materia = session.query(Materii).filter(Materii.id == exam.materieid).first()
 
             materiaToAdd = {
@@ -52,6 +56,19 @@ def get_pending_exams_of_profesor_repo(profesorId):
                 "credite": materia.numarcredite,
                 "abreviere": materia.abreviere,
                 "tipevaluare": materia.tipevaluare,
+            }
+
+            sef = session.query(Student).filter(Student.id == exam.sefid).first()
+            grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
+
+            sefData = {
+                "id": sef.id,
+                "nume": sef.nume,
+                "telefon": sef.telefon,
+                "facultatea": sef.facultatea,
+                "specializarea": sef.specializarea,
+                "idgrupa": sef.idgrupa,
+                "grupa": grupa.grupa,
             }
 
             if isinstance(exam.data, (datetime, date)):
@@ -64,7 +81,7 @@ def get_pending_exams_of_profesor_repo(profesorId):
 
             examList.append({
                 "id": exam.id,
-                "sefid": exam.sefid,
+                "sef": sefData,
                 "profesorid": exam.profesorid,
                 "materie": materiaToAdd,
                 "data": data_serialized,
@@ -74,10 +91,71 @@ def get_pending_exams_of_profesor_repo(profesorId):
         return examList, 200
 
     except Exception as e:
+
+        raise Exception(f"Error while getting exams: {str(e)}")
+
+def get_approved_exams_of_profesor_repo(profesorId):
+
+    try:
+
+        exams = session.query(Examene).filter(
+            Examene.profesorid == profesorId,
+            Examene.starea == Status.APPROVED.name.lower()
+        ).all()
+
+        examList = []
+
+        for exam in exams:
+
+            materia = session.query(Materii).filter(Materii.id == exam.materieid).first()
+
+            materiaToAdd = {
+                "id": materia.id,
+                "nume": materia.nume,
+                "credite": materia.numarcredite,
+                "abreviere": materia.abreviere,
+                "tipevaluare": materia.tipevaluare,
+            }
+
+            sef = session.query(Student).filter(Student.id == exam.sefid).first()
+            grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
+
+            sefData = {
+                "id": sef.id,
+                "nume": sef.nume,
+                "telefon": sef.telefon,
+                "facultatea": sef.facultatea,
+                "specializarea": sef.specializarea,
+                "idgrupa": sef.idgrupa,
+                "grupa": grupa.grupa,
+            }
+
+            if isinstance(exam.data, (datetime, date)):
+
+                data_serialized = exam.data.strftime("%Y-%m-%d")
+
+            else:
+
+                data_serialized = exam.data
+
+            examList.append({
+                "id": exam.id,
+                "sef": sefData,
+                "profesorid": exam.profesorid,
+                "materie": materiaToAdd,
+                "data": data_serialized,
+                "starea": exam.starea
+            })
+
+        return examList, 200
+
+    except Exception as e:
+
         raise Exception(f"Error while getting exams: {str(e)}")
 
 
 def update_examen_repo(examenData):
+
     try:
 
         examen = session.query(Examene).filter(Examene.id == examenData['id']).first()

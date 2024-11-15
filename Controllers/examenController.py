@@ -36,6 +36,20 @@ class getExamen(Resource):
 
             abort(500, "Something went wrong")
 
+@nsExamen.route("/programate/<string:profesorId>")
+class getExameneProgramate(Resource):
+    def get(self, profesorId):
+
+        try:
+
+            examene = get_approved_exams_of_profesor_repo(profesorId)
+
+            return examene
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
 @nsExamen.route("")
 class updateExamen(Resource):
     @nsExamen.expect(updateExamen)
