@@ -68,3 +68,27 @@ def get_asistenti_of_profesor_repo(profesorId):
         raise Exception(f"Error while getting assistants of professor: {str(e)}")
 
 
+def delete_asistent_repo(asistent_id, profesor_id):
+    try:
+
+        # Caută asistentul în baza de date pe baza ambilor parametri
+        asistent = session.query(Asistenti).filter(
+            Asistenti.id == asistent_id,
+            Asistenti.idprof == profesor_id
+        ).first()
+
+        if asistent is None:
+            raise Exception(f"Asistent with id '{asistent_id}' and profesor id '{profesor_id}' not found.")
+
+        # Șterge asistentul
+        session.delete(asistent)
+        session.commit()
+
+        return {"message": f"Asistent with id '{asistent_id}' deleted successfully!"}
+
+    except Exception as e:
+
+        session.rollback()
+
+        raise Exception(f"Error while deleting asistent: {str(e)}")
+
