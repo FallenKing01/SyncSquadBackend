@@ -62,4 +62,5 @@ class update_materie(Resource):
             return message
 
         except Exception:
+
             abort(500, "Something went wrong")

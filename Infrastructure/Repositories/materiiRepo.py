@@ -95,17 +95,18 @@ def update_subject_repo(idMaterie, subject_data):
         if subject is None:
             return {"error": "The subject does not exist"}, 204
 
-        # Actualizează câmpurile materiei
-        if 'nume' in subject_data:
-            subject.nume = subject_data['nume']
-        if 'abreviere' in subject_data:
-            subject.abreviere = subject_data['abreviere']
-        if 'tipevaluare' in subject_data:
-            subject.tipevaluare = subject_data['tipevaluare']
-        if 'numarcredite' in subject_data:
-            subject.numarcredite = subject_data['numarcredite']
+        # Verifică dacă profesorul există în baza de date
         if 'profesorid' in subject_data:
-            subject.profesorid = subject_data['profesorid']
+            profesor = session.query(Profesor).filter(Profesor.id == subject_data['profesorid']).first()
+            if profesor is None:
+                raise Exception(f"Profesor with ID {subject_data['profesorid']} does not exist")
+
+        # Actualizează câmpurile materiei
+        subject.nume = subject_data.get('nume', subject.nume)
+        subject.abreviere = subject_data.get('abreviere', subject.abreviere)
+        subject.tipevaluare = subject_data.get('tipevaluare', subject.tipevaluare)
+        subject.numarcredite = subject_data.get('numarcredite', subject.numarcredite)
+        subject.profesorid = subject_data.get('profesorid', subject.profesorid)
 
         # Salvează modificările
         session.commit()
