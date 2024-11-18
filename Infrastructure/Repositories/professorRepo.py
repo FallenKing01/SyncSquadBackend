@@ -5,7 +5,7 @@ from Domain.extensions import session
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
 from Domain.Entities.saliCereri import SaliCereri
-from datetime import datetime
+from datetime import datetime,timedelta
 
 def add_profesor_repo(profesor_data):
 
@@ -50,7 +50,7 @@ def accept_examen_by_profesor_repo(exam_data):
 
         examen.asistentid = exam_data['asistentid']
         examen.orastart = exam_data['orastart']
-        examen.orafinal = exam_data['orafinal']
+        examen.orafinal = (datetime.strptime(exam_data['orafinal'], "%H:%M") - timedelta(minutes=1)).strftime("%H:%M")
         examen.starea = Status.APPROVED.name.lower()
         examen.actualizatde = examen.profesorid
         examen.actualizatla = datetime.utcnow()
