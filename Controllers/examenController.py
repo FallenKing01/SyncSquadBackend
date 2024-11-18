@@ -64,3 +64,17 @@ class updateExamen(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsExamen.route("/grupaexamene/<string:grupaId>")
+class getExamenByGrupa(Resource):
+    def get(self, grupaId):
+
+        try:
+
+            examene = get_examene_grupa_repo(grupaId)
+
+            return examene
+
+        except Exception:
+
+            abort(500, "Something went wrong")
