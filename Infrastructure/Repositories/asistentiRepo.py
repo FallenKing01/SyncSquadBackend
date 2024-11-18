@@ -92,3 +92,31 @@ def delete_asistent_repo(asistent_id, profesor_id):
 
         raise Exception(f"Error while deleting asistent: {str(e)}")
 
+
+def get_asistenti_repo(profesorId):
+    try:
+
+
+
+        current_assistants = session.query(Asistenti).filter(Asistenti.idprof==profesorId).all()
+        all_asistents = session.query(Profesor).all()
+
+        result = []
+
+        for asistent in all_asistents:
+
+            if asistent.id != profesorId and asistent.id not in [assistant.idasistent for assistant in current_assistants]:
+
+                result.append({
+                    "id": asistent.id,
+                    "nume": asistent.nume,
+                    "telefon": asistent.telefon,
+                    "departament": asistent.departament
+                })
+
+        return result,200
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        return {"error": str(e)}, 500
+

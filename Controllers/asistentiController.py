@@ -48,3 +48,19 @@ class DeleteAsistent(Resource):
         except Exception as e:
 
             abort(500, f"Something went wrong: {str(e)}")
+
+@nsAsistenti.route("neasignati/<string:profesor_id>")
+class get_neasignati(Resource):
+    def get(self, profesor_id):
+
+        try:
+
+            assistants = get_asistenti_repo(profesor_id)
+
+            return assistants
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
+
