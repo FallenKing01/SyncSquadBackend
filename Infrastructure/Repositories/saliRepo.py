@@ -72,34 +72,42 @@ def delete_sala_repo(sala_id):
         raise Exception(f"Error while getting sali: {str(e)}")
 
 
-def get_liber_sala(sala_id, data_examen):
-    # Define the working hours for the day
-    work_start = datetime.strptime("08:00", "%H:%M")
-    work_end = datetime.strptime("20:00", "%H:%M")
+from datetime import datetime, timedelta
 
-    # Fetch scheduled exams for the given room and date
+def round_to_nearest_5_minutes(dt):
+    """Rounds a datetime object to the nearest 5 minutes."""
+    minutes = (dt.minute + 2) // 5 * 5  # Round to the nearest 5
+    return dt.replace(minute=minutes % 60, second=0, microsecond=0) + timedelta(hours=minutes // 60)
+
+def get_liber_sala_repo(sala_id, data_examen):
+    # Define the working hours for the day
+    work_start = round_to_nearest_5_minutes(datetime.strptime("08:00", "%H:%M"))
+    work_end = round_to_nearest_5_minutes(datetime.strptime("20:00", "%H:%M"))
+
+    # Fetch exams scheduled for the specific room and date
     exams = session.query(SaliCereri).filter(SaliCereri.idsala == sala_id).all()
 
-    # If there are no exams scheduled, return the full default time slot
-    if not exams:
-        return [{
-            "ora_start": work_start.strftime("%H:%M"),
-            "ora_end": work_end.strftime("%H:%M")
-        }]
-
-    # Gather and process scheduled exams
+    # Check if there are any exams scheduled on the given date
     scheduled_exams = []
+
     for exam in exams:
         current_exam = session.query(Examene).filter(
             Examene.id == exam.idcerere,
             Examene.data == data_examen
         ).first()
 
-        if current_exam:
+        if current_exam:  # If a valid exam is found, add it to the list
             scheduled_exams.append({
-                "ora_start": datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M"),
-                "ora_end": datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M")
+                "ora_start": round_to_nearest_5_minutes(datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M")),
+                "ora_end": round_to_nearest_5_minutes(datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M"))
             })
+
+    # If no scheduled exams exist for the given date, return the full working hours
+    if not scheduled_exams:
+        return [{
+            "ora_start": work_start.strftime("%H:%M"),
+            "ora_end": work_end.strftime("%H:%M")
+        }]
 
     # Sort exams by start time
     scheduled_exams.sort(key=lambda x: x["ora_start"])
@@ -116,7 +124,7 @@ def get_liber_sala(sala_id, data_examen):
         # If there's a gap between the previous exam and the current one
         if previous_end < start:
             available_slots.append({
-                "ora_start": (previous_end + timedelta(minutes=1)).strftime("%H:%M"),
+                "ora_start": previous_end.strftime("%H:%M"),
                 "ora_end": start.strftime("%H:%M")
             })
 
@@ -126,10 +134,10 @@ def get_liber_sala(sala_id, data_examen):
     # After the last exam, check if there's time left until the end of the working hours
     if previous_end < work_end:
         available_slots.append({
-            "ora_start": (previous_end + timedelta(minutes=1)).strftime("%H:%M"),
+            "ora_start": previous_end.strftime("%H:%M"),
             "ora_end": work_end.strftime("%H:%M")
         })
 
     return available_slots
 
-# Example usage
+
