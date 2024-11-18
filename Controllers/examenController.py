@@ -7,7 +7,7 @@ from Models.Expect.createExamenExpect import *
 nsExamen = Namespace("examen", description="Examen related operations",authorizations=authorizations)
 
 
-@nsExamen.route("")
+@nsExamen.route("/programaeazastudent")
 class createExamen(Resource):
     @nsExamen.expect(createStudentExamene)
     def post(self):
