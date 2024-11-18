@@ -46,7 +46,7 @@ class getLiberSala(Resource):
 
         try:
 
-            liber = get_liber_sala(sala_id, data_examen)
+            liber = get_liber_sala_repo(sala_id, data_examen)
 
             return liber
 

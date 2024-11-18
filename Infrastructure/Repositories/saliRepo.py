@@ -70,78 +70,74 @@ def delete_sala_repo(sala_id):
         session.rollback()
 
         raise Exception(f"Error while getting sali: {str(e)}")
+
+
 from datetime import datetime, timedelta
 
-from datetime import datetime, timedelta
+def round_to_nearest_5_minutes(dt):
+    """Rounds a datetime object to the nearest 5 minutes."""
+    minutes = (dt.minute + 2) // 5 * 5  # Round to the nearest 5
+    return dt.replace(minute=minutes % 60, second=0, microsecond=0) + timedelta(hours=minutes // 60)
 
+def get_liber_sala_repo(sala_id, data_examen):
+    # Define the working hours for the day
+    work_start = round_to_nearest_5_minutes(datetime.strptime("08:00", "%H:%M"))
+    work_end = round_to_nearest_5_minutes(datetime.strptime("20:00", "%H:%M"))
 
-from datetime import datetime
-
-def get_liber_sala(sala_id, data_examen):
-    # Define fixed available intervals
-    morning_start = datetime.strptime("08:00", "%H:%M")
-    morning_end = datetime.strptime("12:00", "%H:%M")
-    evening_start = datetime.strptime("16:00", "%H:%M")
-    evening_end = datetime.strptime("20:00", "%H:%M")
-
-    # Fetch scheduled exams for the room and the given date
+    # Fetch exams scheduled for the specific room and date
     exams = session.query(SaliCereri).filter(SaliCereri.idsala == sala_id).all()
 
-    # If no exams are scheduled, return the fixed intervals
-    if not exams:
-        return [
-            {"ora_start": morning_start.strftime("%H:%M"), "ora_end": morning_end.strftime("%H:%M")},
-            {"ora_start": evening_start.strftime("%H:%M"), "ora_end": evening_end.strftime("%H:%M")}
-        ]
+    # Check if there are any exams scheduled on the given date
+    scheduled_exams = []
 
-    # Initialize the result
+    for exam in exams:
+        current_exam = session.query(Examene).filter(
+            Examene.id == exam.idcerere,
+            Examene.data == data_examen
+        ).first()
+
+        if current_exam:  # If a valid exam is found, add it to the list
+            scheduled_exams.append({
+                "ora_start": round_to_nearest_5_minutes(datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M")),
+                "ora_end": round_to_nearest_5_minutes(datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M"))
+            })
+
+    # If no scheduled exams exist for the given date, return the full working hours
+    if not scheduled_exams:
+        return [{
+            "ora_start": work_start.strftime("%H:%M"),
+            "ora_end": work_end.strftime("%H:%M")
+        }]
+
+    # Sort exams by start time
+    scheduled_exams.sort(key=lambda x: x["ora_start"])
+
+    # Initialize available slots
     available_slots = []
+    previous_end = work_start
 
-    # Process morning slot (08:00 - 12:00)
-    is_morning_available = True
-    for exam in exams:
-        current_exam = session.query(Examene).filter(
-            Examene.id == exam.idcerere,
-            Examene.data == data_examen
-        ).first()
+    # Loop through the scheduled exams and find gaps
+    for exam in scheduled_exams:
+        start = exam["ora_start"]
+        end = exam["ora_end"]
 
-        if current_exam:
-            exam_start = datetime.strptime(str(current_exam.orastart), "%H:%M:%S")
-            exam_end = datetime.strptime(str(current_exam.orafinal), "%H:%M:%S")
+        # If there's a gap between the previous exam and the current one
+        if previous_end < start:
+            available_slots.append({
+                "ora_start": previous_end.strftime("%H:%M"),
+                "ora_end": start.strftime("%H:%M")
+            })
 
-            # Check if the exam overlaps with the morning slot
-            if exam_start < morning_end and exam_end > morning_start:
-                is_morning_available = False
+        # Update the end of the previous exam
+        previous_end = end
 
-    if is_morning_available:
+    # After the last exam, check if there's time left until the end of the working hours
+    if previous_end < work_end:
         available_slots.append({
-            "ora_start": morning_start.strftime("%H:%M"),
-            "ora_end": morning_end.strftime("%H:%M")
-        })
-
-    # Process evening slot (16:00 - 20:00)
-    is_evening_available = True
-    for exam in exams:
-        current_exam = session.query(Examene).filter(
-            Examene.id == exam.idcerere,
-            Examene.data == data_examen
-        ).first()
-
-        if current_exam:
-            exam_start = datetime.strptime(str(current_exam.orastart), "%H:%M:%S")
-            exam_end = datetime.strptime(str(current_exam.orafinal), "%H:%M:%S")
-
-            # Check if the exam overlaps with the evening slot
-            if exam_start < evening_end and exam_end > evening_start:
-                is_evening_available = False
-
-    if is_evening_available:
-        available_slots.append({
-            "ora_start": evening_start.strftime("%H:%M"),
-            "ora_end": evening_end.strftime("%H:%M")
+            "ora_start": previous_end.strftime("%H:%M"),
+            "ora_end": work_end.strftime("%H:%M")
         })
 
     return available_slots
 
 
-# Example usage
