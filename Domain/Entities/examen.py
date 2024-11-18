@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Date
+from sqlalchemy import Column, String, Time, Date
 from Domain.extensions import Base
 class Examene(Base):
     __tablename__ = 'Examene'
@@ -8,8 +8,8 @@ class Examene(Base):
     sefid = Column(String(50), nullable=False)
     materieid = Column(String(50), nullable=True)
     asistentid = Column(String(50), nullable=True)
-    orastart = Column(DateTime, nullable=True)
-    orafinal = Column(DateTime, nullable=True)
+    orastart = Column(Time, nullable=True)  # Changed to Time
+    orafinal = Column(Time, nullable=True)  # Changed to Time
     data = Column(Date, nullable=True)
     starea = Column(String(50), nullable=True)
     actualizatde = Column(String(50), nullable=True)
@@ -24,8 +24,8 @@ class Examene(Base):
         self.sefid = SefId
         self.materieid = MaterieId
         self.asistentid = AsistentId
-        self.orastart = OraStart
-        self.orafinal = OraFinal
+        self.orastart = OraStart  # Time format
+        self.orafinal = OraFinal  # Time format
         self.data = Data
         self.starea = Starea
         self.actualizatde = ActualizatDe
