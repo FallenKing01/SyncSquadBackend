@@ -14,13 +14,13 @@ def create_asistent_repo(titularId , asistentId):
 
     if(titularExist is None):
 
-        return {"error": "The professor does not exist"}, 404
+        return {"error": "The professor does not exist"}, 204
 
     asistentExist = session.query(Profesor).filter(Profesor.id == asistentId).first()
 
     if(asistentExist is None):
 
-        return {"error": "The assistant does not exist"}, 404
+        return {"error": "The assistant does not exist"}, 204
 
 
     try:
@@ -48,7 +48,7 @@ def get_asistenti_of_profesor_repo(profesorId):
 
         if not assistants:
 
-            return assistants_list, 404
+            return assistants_list, 204
 
         for assistant in assistants:
 
