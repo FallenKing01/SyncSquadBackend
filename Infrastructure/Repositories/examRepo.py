@@ -275,4 +275,72 @@ def get_examene_grupa_repo(idGrupa):
     except Exception as e:
         raise Exception(f"Error while getting exams for group: {str(e)}")
 
+def get_examene_sef_semigrupa_stare(sef_id, starea):
+    try:
+
+        examene = session.query(Examene).filter(Examene.sefid == sef_id, Examene.starea == starea).all()
+
+        examList = []
+
+        for examen in examene:
+
+            materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
+
+            materiaToAdd = {
+                "id": materie.id,
+                "nume": materie.nume,
+                "credite": materie.numarcredite,
+                "abreviere": materie.abreviere,
+                "tipevaluare": materie.tipevaluare,
+            }
+
+            # Fetch the Sef and their Grupa (Group)
+            sef = session.query(Student).filter(Student.id == examen.sefid).first()
+            grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
+
+            sefData = {
+                "id": sef.id,
+                "nume": sef.nume,
+                "telefon": sef.telefon,
+                "facultatea": sef.facultatea,
+                "specializarea": sef.specializarea,
+                "idgrupa": sef.idgrupa,
+                "grupa": grupa.grupa,
+            }
+
+            # Convert the 'data' field to string (if it's a date)
+            if isinstance(examen.data, (datetime, date)):
+                data_serialized = examen.data.strftime("%Y-%m-%d")
+            else:
+                data_serialized = examen.data
+
+            # Serialize 'orastart' time
+            orastart_serialized = examen.orastart.strftime("%H:%M") if examen.orastart else None
+
+            # Add one minute to 'orafinal' time if it exists
+            if examen.orafinal:
+                orafinal_time = datetime.combine(datetime.today(), examen.orafinal) + timedelta(minutes=1)
+                orafinal_serialized = orafinal_time.strftime("%H:%M")
+            else:
+                orafinal_serialized = None
+
+            # Append exam data to list
+            examList.append({
+                "id": examen.id,
+                "sef": sefData,
+                "profesorid": examen.profesorid,
+                "materie": materiaToAdd,
+                "data": data_serialized,
+                "starea": examen.starea,
+                "orastart": orastart_serialized,
+                "orafinal": orafinal_serialized
+            })
+
+        return examList, 200
+
+    except Exception as e:
+        raise Exception(f"Error while getting exams for sef and starea: {str(e)}")
+
+
+
 

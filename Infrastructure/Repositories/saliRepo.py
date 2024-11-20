@@ -51,6 +51,7 @@ def get_sali_from_department_repo(departament_name):
         raise Exception(f"Error while getting sali: {str(e)}")
 
 
+
 def delete_sala_repo(sala_id):
     try:
 
@@ -139,5 +140,25 @@ def get_liber_sala_repo(sala_id, data_examen):
         })
 
     return available_slots
+
+def get_sali_dupa_nume_repo(numeSala):
+    try:
+        # Use ilike for case-insensitive partial matching and limit results to 10
+        sali = session.query(Sali).filter(Sali.nume.ilike(f"%{numeSala}%")).limit(10).all()
+
+        # Build the result list
+        sali_list = []
+        for sala in sali:
+            sali_list.append({
+                "id": sala.id,
+                "nume": sala.nume,
+                "departament": sala.departament
+            })
+
+        return sali_list
+
+    except Exception as e:
+        raise Exception(f"Error while getting sali: {str(e)}")
+
 
 

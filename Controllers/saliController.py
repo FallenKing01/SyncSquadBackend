@@ -68,3 +68,17 @@ class deleteSala(Resource):
 
             abort(500, "Something went wrong")
 
+@nsSali.route("/dupanume/<string:numeSala>")
+class getSalaByNume(Resource):
+    def get(self, numeSala):
+
+        try:
+
+            sala = get_sali_dupa_nume_repo(numeSala)
+
+            return sala
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+

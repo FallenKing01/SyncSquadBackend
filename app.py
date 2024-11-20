@@ -13,6 +13,7 @@ from Controllers.asistentiController import nsAsistenti
 from Controllers.saliController import nsSali
 from Controllers.examenController import nsExamen
 from Controllers.loginController import nsLogin
+from Controllers.databaserelatedController import nsDatabase
 app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = 'cookiemonster'
@@ -29,6 +30,7 @@ api.add_namespace(nsMaterii)
 api.add_namespace(nsAsistenti)
 api.add_namespace(nsSali)
 api.add_namespace(nsExamen)
+api.add_namespace(nsDatabase)
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):
