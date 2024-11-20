@@ -64,3 +64,17 @@ class update_materie(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsMaterii.route("/studentmateriifaraexamen/<string:profesorId>/<string:studentId>")
+class get_materii_fara_examen(Resource):
+    def get(self, profesorId, studentId):
+
+        try:
+
+            subjects = get_materii_examene_neprogramate_repo(profesorId,studentId)
+
+            return subjects
+
+        except Exception:
+
+            abort(500, "Something went wrong")

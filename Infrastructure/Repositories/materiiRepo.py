@@ -2,6 +2,7 @@ import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
 from Domain.extensions import session
+from Domain.Entities.examen import Examene
 
 def add_subject_repo(subject_data):
 
@@ -120,3 +121,38 @@ def update_subject_repo(idMaterie, subject_data):
         session.rollback()
 
         raise Exception(f"Error while updating subject: {str(e)}")
+
+def get_materii_examene_neprogramate_repo(profesorId, studentId):
+
+    try:
+
+        subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
+        subjects_list = []
+
+        examene = session.query(Examene).filter(Examene.sefid == studentId).all()
+
+        materii_cu_examene_ids = []
+
+        for examen in examene:
+
+            materii_cu_examene_ids.append(examen.materieid)
+
+        for subject in subjects:
+
+                if subject.id not in materii_cu_examene_ids:
+
+                    subject_dict = {
+                        "subjectId": subject.id,
+                        "nume": subject.nume,
+                        "abreviere" : subject.abreviere,
+                        "tipEvaluare" : subject.tipevaluare,
+                        "numarCredite" : subject.numarcredite,
+                    }
+
+                    subjects_list.append(subject_dict)
+
+        return subjects_list
+
+    except Exception as e:
+
+        raise Exception(f"Error while getting subjects of professor: {str(e)}")

@@ -78,3 +78,17 @@ class getExamenByGrupa(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsExamen.route("/studentdupastare/<string:studentId>/<string:stare>")
+class getExamenByStare(Resource):
+    def get(self, studentId, stare):
+
+        try:
+
+            examene = get_examene_sef_semigrupa_stare(studentId, stare)
+
+            return examene
+
+        except Exception:
+
+            abort(500, "Something went wrong")
