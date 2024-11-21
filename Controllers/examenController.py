@@ -24,6 +24,7 @@ class createExamen(Resource):
 
 @nsExamen.route("/<string:profesorId>")
 class getExamen(Resource):
+    @nsExamen.doc(description="Fetch pending exams for a specific professor by their ID.")
     def get(self, profesorId):
 
         try:
@@ -52,6 +53,7 @@ class getExameneProgramate(Resource):
 
 @nsExamen.route("")
 class updateExamen(Resource):
+    @nsExamen.doc(description="Change the date and hour of an exam.")
     @nsExamen.expect(updateExamen)
     def put(self):
 
@@ -88,6 +90,21 @@ class getExamenByStare(Resource):
             examene = get_examene_sef_semigrupa_stare(studentId, stare)
 
             return examene
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
+@nsExamen.route("/refuzaexamen/<string:examenId>")
+class declineExamen(Resource):
+    @nsExamen.expect(declineExamen)
+    def delete(self, examenId):
+
+        try:
+
+            decline_examen_repo(examenId, api.payload)
+
+            return {"message": "Examen declined successfully"}
 
         except Exception:
 

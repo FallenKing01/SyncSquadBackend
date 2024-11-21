@@ -8,7 +8,10 @@ from Domain.Entities.utilizator import Utilizator
 from Domain.Entities.saliCereri import SaliCereri
 from Domain.Entities.student import Student
 from Domain.Entities.grupa import Grupe
+from Domain.Entities.profesor import Profesor
 from datetime import datetime, date
+from Services.EmailSenderService import sendEmail
+from Domain.Entities.sala import Sali
 
 def add_examen_repo(exam_data):
 
@@ -196,8 +199,41 @@ def update_examen_repo(examenData):
 
         student_data = session.query(Utilizator).filter(Utilizator.id == examenData['sefid']).first()
 
+        materiaId = examen.materieid
+        reactualizantId = examenData['actualizatde']
+        salaId = examenData['salaid']
+
+        reactualizant_data = session.query(Utilizator).filter(Utilizator.id == reactualizantId).first()
+        sala_data = session.query(Sali).filter(Sali.id == salaId).first()
+
+        if str(reactualizant_data.rol) == "secretar":
+
+            rol = "secretariat."
+
+        else:
+
+            rol = "profesorul titular la curs."
+
+        materie_data = session.query(Materii).filter(Materii.id == materiaId).first()
+
+
         if student_data:
-            pass
+
+                text = ("Examenul la materia " + str(materie_data.nume) + " a fost reprogramat pentru data de " + str(examenData['data'])
+                        + " in intervalul orar " + str(examenData['orastart']) + " - " + str(examenData['orafinal']) +". Examenul se va sustine in sala " +
+                        str(sala_data.nume) +" in corpul "+ str(sala_data.cladire) + ".\nVa adresez urmatoarele: \n" +
+                        str(examenData['motiv']) + "\nExamenul a fost reactualizat de " + rol)
+
+                titlu = "Reprogramare examen " + str(materie_data.nume)
+
+                data = {
+                    "text": text,
+                    "titlu": titlu,
+                    "email": str(student_data.email)
+                }
+
+                sendEmail(data)
+
 
     except Exception as e:
 
@@ -339,7 +375,49 @@ def get_examene_sef_semigrupa_stare(sef_id, starea):
         return examList, 200
 
     except Exception as e:
+
         raise Exception(f"Error while getting exams for sef and starea: {str(e)}")
+
+def decline_examen_repo(examId,data):
+
+    try:
+
+        examen = session.query(Examene).filter(Examene.id == examId).first()
+
+        if examen is None:
+
+            raise Exception(f"Examen with id {examId} not found.")
+
+
+        examen.starea = Status.REJECTED.name.lower()
+        session.commit()
+
+        profId = examen.profesorid
+        materieId = examen.materieid
+        studentId = examen.sefid
+
+        dateProfesor = session.query(Profesor).filter(Profesor.id == profId).first()
+        dateMaterie = session.query(Materii).filter(Materii.id == materieId).first()
+        emailStudent = session.query(Utilizator).filter(Utilizator.id == studentId).first()
+
+        text = "Rog reprogramarea examenului la materia " + str(dateMaterie.nume) + " pentru data de " + str(examen.data) + "\n Va adresez urmatoarele : \n" + data["motiv"] + "\n Cu respect, " + str(dateProfesor.nume)
+        titlu = "Reprogramare examen " + str(dateMaterie.nume)
+
+        data = {
+            "text": text,
+            "titlu": titlu,
+            "email": emailStudent.email
+        }
+
+        sendEmail(data)
+
+        return {"message": "Examen rejected successfully"}, 200
+
+    except Exception as e:
+
+        session.rollback()
+
+        raise Exception(f"Error while rejecting exam: {str(e)}")
 
 
 
