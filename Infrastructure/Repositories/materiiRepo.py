@@ -3,6 +3,7 @@ from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
 from Domain.extensions import session
 from Domain.Entities.examen import Examene
+from Utils.enums.statusExam import Status
 
 def add_subject_repo(subject_data):
 
@@ -129,7 +130,7 @@ def get_materii_examene_neprogramate_repo(profesorId, studentId):
         subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
         subjects_list = []
 
-        examene = session.query(Examene).filter(Examene.sefid == studentId).all()
+        examene = session.query(Examene).filter(Examene.sefid == studentId,Examene.starea != Status.REJECTED.name.lower()).all()
 
         materii_cu_examene_ids = []
 
