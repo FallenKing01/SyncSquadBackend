@@ -14,7 +14,7 @@ def login_user(accountData):
 
         if user is None:
 
-            raise ValueError("User not found", 404)
+            raise ValueError("User not found", 204)
 
         checkedPass = hash_password(password).decode('utf-8')
 
@@ -23,7 +23,7 @@ def login_user(accountData):
 
         if not verify_password(password, user.parola):
 
-            raise ValueError("Wrong password", 401)
+            raise ValueError("Wrong password", 204)
 
         userData = {
             "id": user.id,

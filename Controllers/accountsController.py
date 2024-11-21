@@ -64,7 +64,7 @@ class getUserInfo(Resource):
 
         except Exception as e:
 
-            abort(404, str(e))
+            abort(204, str(e))
 
 
 @nsUser.route("")
@@ -78,6 +78,6 @@ class getUsersFromDb(Resource):
 
         except Exception as e:
 
-            abort(404, str(e))
+            abort(204, str(e))
 
 
