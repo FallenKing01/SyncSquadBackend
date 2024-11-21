@@ -103,7 +103,7 @@ def get_info_user_repo(id):
 
         if userData is None:
 
-            raise Exception("User not found", 404)
+            raise Exception("User not found", 204)
 
         if userData.rol == Role.STUDENT.name.lower() or userData.rol == Role.SEF.name.lower():
 
@@ -181,7 +181,7 @@ def get_user_by_id_repo(id):
 
         if user is None:
 
-            raise Exception("User not found", 404)
+            raise Exception("User not found", 204)
 
         return user
 

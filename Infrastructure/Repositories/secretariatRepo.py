@@ -53,7 +53,7 @@ def get_students_of_group_repo(grupaId):
 
         if not students:
 
-            return students_list, 404
+            return students_list, 204
 
         for student in students:
 

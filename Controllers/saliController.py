@@ -82,3 +82,17 @@ class getSalaByNume(Resource):
 
             abort(500, "Something went wrong")
 
+@nsSali.route("/orar/<string:sala_id>/<string:data_examen>")
+class getOrarSala(Resource):
+    def get(self, sala_id, data_examen):
+
+        try:
+
+            orar = get_orar_sali_repo(sala_id, data_examen)
+
+            return orar
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+

@@ -1,11 +1,12 @@
 import uuid
+
+from Domain.Entities.materie import Materii
 from Domain.extensions import session
 from Domain.Entities.sala import Sali
 from Domain.Entities.saliCereri import SaliCereri
 from Domain.Entities.examen import Examene
 from datetime import datetime,timedelta
-from sqlalchemy.exc import SQLAlchemyError
-
+from Utils.enums.statusExam import Status
 def add_sali_repo(sali_data):
 
     sala = Sali(sali_data['id'], sali_data['nume'], sali_data['departament'])
@@ -142,6 +143,7 @@ def get_liber_sala_repo(sala_id, data_examen):
     return available_slots
 
 def get_sali_dupa_nume_repo(numeSala):
+
     try:
         # Use ilike for case-insensitive partial matching and limit results to 10
         sali = session.query(Sali).filter(Sali.nume.ilike(f"%{numeSala}%")).limit(10).all()
@@ -156,6 +158,53 @@ def get_sali_dupa_nume_repo(numeSala):
             })
 
         return sali_list
+
+    except Exception as e:
+        raise Exception(f"Error while getting sali: {str(e)}")
+
+def get_orar_sali_repo(salaId, data):
+    try:
+        # Get all requests for the specified room
+        sali_cereri = session.query(SaliCereri).filter(SaliCereri.idsala == salaId).all()
+
+        # Extract the list of exam request IDs
+        exameneId = {cerere.idcerere for cerere in sali_cereri}
+
+        # Query all exams for the specified date
+        examene = (
+            session.query(Examene)
+            .filter(Examene.data == data, Examene.starea == Status.APPROVED.name.lower())
+            .all()
+        )
+
+        examene_list = []
+
+        for examen in examene:
+            # Skip exams that match any ID in the cereri list
+            if examen.id in exameneId:
+
+
+                # Fetch subject (Materii) details
+                materia = session.query(Materii).filter(Materii.id == examen.materieid).first()
+
+                # Prepare subject details if found
+                data_materia = {
+                    "id": materia.id,
+                    "nume": materia.nume,
+                    "abreviere": materia.abreviere,
+                    "tipevaluare": materia.tipevaluare,
+                } if materia else None
+
+                # Add exam details to the list
+                examene_list.append({
+                    "id": examen.id,
+                    "data": examen.data.isoformat(),
+                    "orastart": str(examen.orastart),
+                    "orafinal": str(examen.orafinal),
+                    "materie": data_materia,
+                })
+
+        return examene_list
 
     except Exception as e:
         raise Exception(f"Error while getting sali: {str(e)}")

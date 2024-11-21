@@ -36,3 +36,18 @@ class acceptExamen(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsProfessor.route("/profesororar/<string:prof_id>/<string:data>")
+class getOrar(Resource):
+
+    def get(self,prof_id,data):
+
+        try:
+
+            orar = get_orar_of_prof_repo(prof_id,data)
+
+            return orar
+
+        except Exception:
+
+            abort(500, "Something went wrong")
