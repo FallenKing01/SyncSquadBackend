@@ -2,33 +2,32 @@ import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
 from Domain.Entities.asistent import Asistenti
-from Domain.extensions import session
+from Domain.extensions import open_session
 
 
 
 def create_asistent_repo(titularId , asistentId):
 
-    id = str(uuid.uuid4())
-
-    titularExist = session.query(Profesor).filter(Profesor.id == titularId).first()
-
-    if(titularExist is None):
-
-        return {"error": "The professor does not exist"}, 204
-
-    asistentExist = session.query(Profesor).filter(Profesor.id == asistentId).first()
-
-    if(asistentExist is None):
-
-        return {"error": "The assistant does not exist"}, 204
-
-
     try:
 
+        session = open_session()
+
+        id = str(uuid.uuid4())
+
+        titularExist = session.query(Profesor).filter(Profesor.id == titularId).first()
+
+        if(titularExist is None):
+
+            return {"error": "The professor does not exist"}, 204
+
+        asistentExist = session.query(Profesor).filter(Profesor.id == asistentId).first()
+
+        if(asistentExist is None):
+
+            return {"error": "The assistant does not exist"}, 204
+
         asistent = Asistenti(id, titularId ,asistentId)
-
         session.add(asistent)
-
         session.commit()
 
         return {"message": "Assistant created successfully"}, 201
@@ -39,9 +38,16 @@ def create_asistent_repo(titularId , asistentId):
 
         raise Exception(f"Error while inserting assistant: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_asistenti_of_profesor_repo(profesorId):
+
+    session = open_session()
+
     try:
-        # Fetch the list of assistants for the professor
+
         assistants = session.query(Asistenti).filter(Asistenti.idprof == profesorId).all()
 
         assistants_list = []
@@ -67,11 +73,17 @@ def get_asistenti_of_profesor_repo(profesorId):
 
         raise Exception(f"Error while getting assistants of professor: {str(e)}")
 
+    finally:
+
+        session.close()
+
 
 def delete_asistent_repo(asistent_id, profesor_id):
+
     try:
 
-        # Caută asistentul în baza de date pe baza ambilor parametri
+        session = open_session()
+
         asistent = session.query(Asistenti).filter(
             Asistenti.id == asistent_id,
             Asistenti.idprof == profesor_id
@@ -80,7 +92,6 @@ def delete_asistent_repo(asistent_id, profesor_id):
         if asistent is None:
             raise Exception(f"Asistent with id '{asistent_id}' and profesor id '{profesor_id}' not found.")
 
-        # Șterge asistentul
         session.delete(asistent)
         session.commit()
 
@@ -92,11 +103,16 @@ def delete_asistent_repo(asistent_id, profesor_id):
 
         raise Exception(f"Error while deleting asistent: {str(e)}")
 
+    finally:
+
+        session.close()
+
 
 def get_asistenti_repo(profesorId):
+
     try:
 
-
+        session = open_session()
 
         current_assistants = session.query(Asistenti).filter(Asistenti.idprof==profesorId).all()
         all_asistents = session.query(Profesor).all()
@@ -117,6 +133,10 @@ def get_asistenti_repo(profesorId):
         return result,200
 
     except Exception as e:
-        # Handle exceptions and return an error response
+
         return {"error": str(e)}, 500
+
+    finally:
+
+        session.close()
 

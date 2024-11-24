@@ -1,7 +1,7 @@
 import uuid
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Domain.Entities.materie import Materii
 from datetime import datetime,timedelta
 from Domain.Entities.utilizator import Utilizator
@@ -13,11 +13,13 @@ from datetime import datetime, date
 from Services.EmailSenderService import sendEmail
 from Domain.Entities.sala import Sali
 
-def add_examen_repo(exam_data):
-
+def add_examen_repo(exam_data,session):
 
     exam = Examene(Id=exam_data["id"],SefId=exam_data["sefid"],ProfesorId=exam_data["profesorid"], MaterieId=exam_data["materieid"], Data=exam_data["data"],Starea=Status.PENDING.name.lower())
     session.add(exam)
+
+
+
 
 def create_examen_repo(exam_data):
 
@@ -25,9 +27,10 @@ def create_examen_repo(exam_data):
 
     try:
 
+        session = open_session()
         exam_data["id"] = id
 
-        add_examen_repo(exam_data)
+        add_examen_repo(exam_data,session)
         session.commit()
 
         return {"message": "Exam added successfully"}, 201
@@ -38,11 +41,16 @@ def create_examen_repo(exam_data):
 
         raise Exception(f"Error while inserting exam: {str(e)}")
 
+    finally:
 
+        session.close()
 
 def get_pending_exams_of_profesor_repo(profesorId):
 
     try:
+
+        session = open_session()
+
         exams = session.query(Examene).filter(
             Examene.profesorid == profesorId,
             Examene.starea == Status.PENDING.name.lower()
@@ -98,8 +106,16 @@ def get_pending_exams_of_profesor_repo(profesorId):
 
         raise Exception(f"Error while getting exams: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_approved_exams_of_profesor_repo(profesorId):
+
     try:
+
+        session = open_session()
+
         exams = session.query(Examene).filter(
             Examene.profesorid == profesorId,
             Examene.starea == Status.APPROVED.name.lower()
@@ -108,7 +124,7 @@ def get_approved_exams_of_profesor_repo(profesorId):
         examList = []
 
         for exam in exams:
-            # Fetch Materii (Subjects)
+
             materia = session.query(Materii).filter(Materii.id == exam.materieid).first()
 
             materiaToAdd = {
@@ -139,17 +155,17 @@ def get_approved_exams_of_profesor_repo(profesorId):
             else:
                 data_serialized = exam.data
 
-            # 'orastart' time remains unchanged
             orastart_serialized = exam.orastart.strftime("%H:%M") if exam.orastart else None
 
-            # Add one minute to 'orafinal' if it's not None
             if exam.orafinal:
+
                 orafinal_time = datetime.combine(datetime.today(), exam.orafinal) + timedelta(minutes=1)
                 orafinal_serialized = orafinal_time.strftime("%H:%M")
+
             else:
+
                 orafinal_serialized = None
 
-            # Add exam details to list
             examList.append({
                 "id": exam.id,
                 "sef": sefData,
@@ -164,12 +180,15 @@ def get_approved_exams_of_profesor_repo(profesorId):
         return examList, 200
 
     except Exception as e:
+
         raise Exception(f"Error while getting exams: {str(e)}")
 
 
 def update_examen_repo(examenData):
 
     try:
+
+        session = open_session()
 
         examen = session.query(Examene).filter(Examene.id == examenData['id']).first()
 
@@ -241,12 +260,18 @@ def update_examen_repo(examenData):
 
         raise Exception(f"Error while updating examen: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_examene_grupa_repo(idGrupa):
+
     try:
-        # Fetch the Sef for the group
+
+        session = open_session()
+
         sefId = session.query(Student).filter(Student.idgrupa == idGrupa, Student.sef == True).first()
 
-        # Fetch exams for that Sef
         examene = session.query(Examene).filter(Examene.sefid == sefId.id, Examene.starea == Status.APPROVED.name.lower()).all()
 
         examList = []
@@ -309,10 +334,18 @@ def get_examene_grupa_repo(idGrupa):
         return examList, 200
 
     except Exception as e:
+
         raise Exception(f"Error while getting exams for group: {str(e)}")
 
+    finally:
+
+            session.close()
+
 def get_examene_sef_semigrupa_stare(sef_id, starea):
+
     try:
+
+        session = open_session()
 
         examene = session.query(Examene).filter(Examene.sefid == sef_id, Examene.starea == starea).all()
 
@@ -378,9 +411,15 @@ def get_examene_sef_semigrupa_stare(sef_id, starea):
 
         raise Exception(f"Error while getting exams for sef and starea: {str(e)}")
 
+    finally:
+
+            session.close()
+
 def decline_examen_repo(examId,data):
 
     try:
+
+        session = open_session()
 
         examen = session.query(Examene).filter(Examene.id == examId).first()
 
@@ -418,6 +457,10 @@ def decline_examen_repo(examId,data):
         session.rollback()
 
         raise Exception(f"Error while rejecting exam: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 

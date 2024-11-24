@@ -1,11 +1,11 @@
 import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
 
-def add_subject_repo(subject_data):
+def add_subject_repo(subject_data,session):
 
     subject = Materii(subject_data['id'], subject_data['nume'], subject_data['abreviere'],
                       subject_data['tipevaluare'], subject_data['numarcredite'], subject_data['profesorid'])
@@ -18,6 +18,8 @@ def create_subject_repo(subject_data):
 
     try:
 
+        session = open_session()
+
         profesor = session.query(Profesor).filter(Profesor.id == subject_data['profesorid']).first()
 
         if profesor is None:
@@ -25,7 +27,7 @@ def create_subject_repo(subject_data):
             return {"error": "The professor does not exist"}, 204
 
         subject_data['id'] = subject_id
-        add_subject_repo(subject_data)
+        add_subject_repo(subject_data,session)
 
         session.commit()
 
@@ -35,13 +37,17 @@ def create_subject_repo(subject_data):
 
         session.rollback()
 
-        print(f"Error while inserting subject: {e}")
         raise Exception(f"Error while inserting subject: {str(e)}")
 
+    finally:
+
+        session.close()
 
 def get_subjects_of_profesor_repo(profesorId):
 
     try:
+
+        session = open_session()
 
         subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
         subjects_list = []
@@ -68,9 +74,15 @@ def get_subjects_of_profesor_repo(profesorId):
 
         raise Exception(f"Error while getting subjects of professor: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def delete_subject_repo(idMaterie):
 
     try:
+
+         session = open_session()
 
          subject = session.query(Materii).filter(Materii.id == idMaterie).first()
 
@@ -89,30 +101,36 @@ def delete_subject_repo(idMaterie):
 
             raise Exception(f"Error while deleting subject: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def update_subject_repo(idMaterie, subject_data):
 
     try:
 
-        # Găsește materia după ID
+        session = open_session()
+
         subject = session.query(Materii).filter(Materii.id == idMaterie).first()
 
         if subject is None:
+
             return {"error": "The subject does not exist"}, 204
 
-        # Verifică dacă profesorul există în baza de date
         if 'profesorid' in subject_data:
+
             profesor = session.query(Profesor).filter(Profesor.id == subject_data['profesorid']).first()
+
             if profesor is None:
+
                 raise Exception(f"Profesor with ID {subject_data['profesorid']} does not exist")
 
-        # Actualizează câmpurile materiei
         subject.nume = subject_data.get('nume', subject.nume)
         subject.abreviere = subject_data.get('abreviere', subject.abreviere)
         subject.tipevaluare = subject_data.get('tipevaluare', subject.tipevaluare)
         subject.numarcredite = subject_data.get('numarcredite', subject.numarcredite)
         subject.profesorid = subject_data.get('profesorid', subject.profesorid)
 
-        # Salvează modificările
         session.commit()
 
         return {"message": "Subject updated successfully"}, 200
@@ -123,9 +141,15 @@ def update_subject_repo(idMaterie, subject_data):
 
         raise Exception(f"Error while updating subject: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_materii_examene_neprogramate_repo(profesorId, studentId):
 
     try:
+
+        session = open_session()
 
         subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
         subjects_list = []
@@ -157,3 +181,7 @@ def get_materii_examene_neprogramate_repo(profesorId, studentId):
     except Exception as e:
 
         raise Exception(f"Error while getting subjects of professor: {str(e)}")
+
+    finally:
+
+        session.close()

@@ -31,8 +31,12 @@ url_object = URL.create(
 
 Base = declarative_base()
 engine = create_engine(url_object)
-Sesion = sessionmaker(bind=engine)
-session = Sesion()
 salt = bcrypt.gensalt()
 api = Api()
 
+def open_session():
+
+    Sesion = sessionmaker(bind=engine)
+    session = Sesion()
+
+    return session

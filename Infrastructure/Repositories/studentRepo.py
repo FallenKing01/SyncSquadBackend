@@ -1,4 +1,4 @@
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Domain.Entities.student import Student
 from Domain.Entities.utilizator import Utilizator
 from Domain.Entities.profesor import Profesor
@@ -6,7 +6,7 @@ from Utils.enums.role import Role
 from Domain.Entities.grupa import Grupe
 from Domain.Entities.examen import Examene
 
-def add_student_repo(student_data):
+def add_student_repo(student_data,session):
 
     student = Student(student_data['id'], student_data['nume'], student_data['telefon'], student_data['facultatea'],student_data['specializarea'], student_data['idgrupa'], False)
     session.add(student)
@@ -14,6 +14,8 @@ def add_student_repo(student_data):
 def update_student(grupaId,studentId):
 
     try:
+
+        session = open_session()
 
         existaSef = session.query(Student).filter(Student.idgrupa == grupaId, Student.sef == 1).first()
 
@@ -49,6 +51,10 @@ def update_student(grupaId,studentId):
         session.rollback()
 
         raise Exception(f"Error while updating student: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 

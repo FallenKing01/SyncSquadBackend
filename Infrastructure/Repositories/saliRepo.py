@@ -1,13 +1,13 @@
 import uuid
 
 from Domain.Entities.materie import Materii
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Domain.Entities.sala import Sali
 from Domain.Entities.saliCereri import SaliCereri
 from Domain.Entities.examen import Examene
 from datetime import datetime,timedelta
 from Utils.enums.statusExam import Status
-def add_sali_repo(sali_data):
+def add_sali_repo(sali_data,session):
 
     sala = Sali(sali_data['id'], sali_data['nume'], sali_data['departament'])
     session.add(sala)
@@ -18,8 +18,10 @@ def create_sali_repo(sali_data):
 
     try:
 
+        session = open_session()
+
         sali_data['id'] = id
-        add_sali_repo(sali_data)
+        add_sali_repo(sali_data,session)
         session.commit()
 
         return {"message": "Sala adaugata cu succes!"},201
@@ -30,9 +32,15 @@ def create_sali_repo(sali_data):
 
         raise Exception(f"Error while adding sala: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_sali_from_department_repo(departament_name):
 
     try:
+
+        session = open_session()
 
         sali = session.query(Sali).filter(Sali.departament == departament_name).all()
 
@@ -49,12 +57,20 @@ def get_sali_from_department_repo(departament_name):
         return sali_list
 
     except Exception as e:
+
         raise Exception(f"Error while getting sali: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 
 def delete_sala_repo(sala_id):
+
     try:
+
+        session = open_session()
 
         sala = session.query(Sali).filter(Sali.id == sala_id).first()
 
@@ -73,8 +89,11 @@ def delete_sala_repo(sala_id):
 
         raise Exception(f"Error while getting sali: {str(e)}")
 
+    finally:
 
-from datetime import datetime, timedelta
+        session.close()
+
+
 
 def round_to_nearest_5_minutes(dt):
     """Rounds a datetime object to the nearest 5 minutes."""
@@ -82,69 +101,81 @@ def round_to_nearest_5_minutes(dt):
     return dt.replace(minute=minutes % 60, second=0, microsecond=0) + timedelta(hours=minutes // 60)
 
 def get_liber_sala_repo(sala_id, data_examen):
-    # Define the working hours for the day
-    work_start = round_to_nearest_5_minutes(datetime.strptime("08:00", "%H:%M"))
-    work_end = round_to_nearest_5_minutes(datetime.strptime("20:00", "%H:%M"))
 
-    # Fetch exams scheduled for the specific room and date
-    exams = session.query(SaliCereri).filter(SaliCereri.idsala == sala_id).all()
+    try:
+        session = open_session()
 
-    # Check if there are any exams scheduled on the given date
-    scheduled_exams = []
+        work_start = round_to_nearest_5_minutes(datetime.strptime("08:00", "%H:%M"))
+        work_end = round_to_nearest_5_minutes(datetime.strptime("20:00", "%H:%M"))
 
-    for exam in exams:
-        current_exam = session.query(Examene).filter(
-            Examene.id == exam.idcerere,
-            Examene.data == data_examen
-        ).first()
+        exams = session.query(SaliCereri).filter(SaliCereri.idsala == sala_id).all()
 
-        if current_exam:  # If a valid exam is found, add it to the list
-            scheduled_exams.append({
-                "ora_start": round_to_nearest_5_minutes(datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M")),
-                "ora_end": round_to_nearest_5_minutes(datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M"))
-            })
+        # Check if there are any exams scheduled on the given date
+        scheduled_exams = []
 
-    # If no scheduled exams exist for the given date, return the full working hours
-    if not scheduled_exams:
-        return [{
-            "ora_start": work_start.strftime("%H:%M"),
-            "ora_end": work_end.strftime("%H:%M")
-        }]
+        for exam in exams:
+            current_exam = session.query(Examene).filter(
+                Examene.id == exam.idcerere,
+                Examene.data == data_examen
+            ).first()
 
-    # Sort exams by start time
-    scheduled_exams.sort(key=lambda x: x["ora_start"])
+            if current_exam:  # If a valid exam is found, add it to the list
+                scheduled_exams.append({
+                    "ora_start": round_to_nearest_5_minutes(datetime.strptime(current_exam.orastart.strftime("%H:%M"), "%H:%M")),
+                    "ora_end": round_to_nearest_5_minutes(datetime.strptime(current_exam.orafinal.strftime("%H:%M"), "%H:%M"))
+                })
 
-    # Initialize available slots
-    available_slots = []
-    previous_end = work_start
+        # If no scheduled exams exist for the given date, return the full working hours
+        if not scheduled_exams:
+            return [{
+                "ora_start": work_start.strftime("%H:%M"),
+                "ora_end": work_end.strftime("%H:%M")
+            }]
 
-    # Loop through the scheduled exams and find gaps
-    for exam in scheduled_exams:
-        start = exam["ora_start"]
-        end = exam["ora_end"]
+        # Sort exams by start time
+        scheduled_exams.sort(key=lambda x: x["ora_start"])
 
-        # If there's a gap between the previous exam and the current one
-        if previous_end < start:
+        # Initialize available slots
+        available_slots = []
+        previous_end = work_start
+
+        # Loop through the scheduled exams and find gaps
+        for exam in scheduled_exams:
+            start = exam["ora_start"]
+            end = exam["ora_end"]
+
+            # If there's a gap between the previous exam and the current one
+            if previous_end < start:
+                available_slots.append({
+                    "ora_start": previous_end.strftime("%H:%M"),
+                    "ora_end": start.strftime("%H:%M")
+                })
+
+            # Update the end of the previous exam
+            previous_end = end
+
+        # After the last exam, check if there's time left until the end of the working hours
+        if previous_end < work_end:
             available_slots.append({
                 "ora_start": previous_end.strftime("%H:%M"),
-                "ora_end": start.strftime("%H:%M")
+                "ora_end": work_end.strftime("%H:%M")
             })
 
-        # Update the end of the previous exam
-        previous_end = end
+        return available_slots
 
-    # After the last exam, check if there's time left until the end of the working hours
-    if previous_end < work_end:
-        available_slots.append({
-            "ora_start": previous_end.strftime("%H:%M"),
-            "ora_end": work_end.strftime("%H:%M")
-        })
+    except Exception as e:
 
-    return available_slots
+        raise Exception(f"Error while getting sali: {str(e)}")
+
+    finally:
+
+        session.close()
 
 def get_sali_dupa_nume_repo(numeSala):
 
     try:
+
+        session = open_session()
         # Use ilike for case-insensitive partial matching and limit results to 10
         sali = session.query(Sali).filter(Sali.nume.ilike(f"%{numeSala}%")).limit(10).all()
 
@@ -160,11 +191,19 @@ def get_sali_dupa_nume_repo(numeSala):
         return sali_list
 
     except Exception as e:
+
         raise Exception(f"Error while getting sali: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_orar_sali_repo(salaId, data):
+
     try:
-        # Get all requests for the specified room
+
+        session = open_session()
+
         sali_cereri = session.query(SaliCereri).filter(SaliCereri.idsala == salaId).all()
 
         # Extract the list of exam request IDs
@@ -207,7 +246,12 @@ def get_orar_sali_repo(salaId, data):
         return examene_list
 
     except Exception as e:
+
         raise Exception(f"Error while getting sali: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 
