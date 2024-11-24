@@ -2,7 +2,7 @@ import uuid
 from Domain.Entities.student import Student
 from Domain.Entities.utilizator import Utilizator
 from Utils.passwordhash import hash_password
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Infrastructure.Repositories.professorRepo import add_profesor_repo
 from Infrastructure.Repositories.secretariatRepo import add_secretar_repo
 from Infrastructure.Repositories.studentRepo import add_student_repo
@@ -10,7 +10,7 @@ from Utils.enums.role import Role
 from Domain.Entities.profesor import Profesor
 from Domain.Entities.secretar import Secretar
 
-def add_utilizator_repo(user_data):
+def add_utilizator_repo(user_data,session):
 
         user = Utilizator(user_data['id'], user_data['email'], user_data['parola'], user_data['rol'])
         session.add(user)
@@ -21,12 +21,14 @@ def create_student_repo(user_data):
 
     try:
 
+        session = open_session()
+
         user_data['parola'] = hash_password(user_data['parola']).decode('utf-8')
         user_data['id'] = user_id
         user_data['rol'] = Role.STUDENT.name.lower()
 
-        add_utilizator_repo(user_data)
-        add_student_repo(user_data)
+        add_utilizator_repo(user_data,session)
+        add_student_repo(user_data,session)
 
         session.commit()
 
@@ -38,11 +40,13 @@ def create_student_repo(user_data):
 
         if "email" in str(e).lower() and "unique" in str(e).lower():
 
-            return {
-                "error": "Email already exists. Please use a different email."}, 409  # 409 Conflict HTTP status code
+            return {"error": "Email already exists. Please use a different email."}, 409
 
-        print(f"Error while inserting user: {e}")
         raise Exception(f"Error while inserting user: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 def create_profesor_repo(user_data):
@@ -54,10 +58,13 @@ def create_profesor_repo(user_data):
 
     try:
 
-        add_utilizator_repo(user_data)
-        add_profesor_repo(user_data)
+        session = open_session()
+
+        add_utilizator_repo(user_data,session)
+        add_profesor_repo(user_data,session)
 
         session.commit()
+
         return {"message": "Profesor created successfully"}, 201
 
     except Exception as e:
@@ -69,6 +76,10 @@ def create_profesor_repo(user_data):
 
         raise Exception(f"Error while inserting professor: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def create_secretar_repo(user_data):
 
     user_id = str(uuid.uuid4())
@@ -78,10 +89,13 @@ def create_secretar_repo(user_data):
 
     try:
 
-        add_utilizator_repo(user_data)
-        add_secretar_repo(user_data)
+        session = open_session()
+
+        add_utilizator_repo(user_data,session)
+        add_secretar_repo(user_data,session)
 
         session.commit()
+
         return {"message": "Secretar created successfully"}, 201
 
     except Exception as e:
@@ -94,10 +108,16 @@ def create_secretar_repo(user_data):
         print(f"Error while inserting secretary: {e}")
         raise Exception(f"Error while inserting secretary: {str(e)}")
 
+    finally:
+
+        session.close()
+
 
 def get_info_user_repo(id):
 
     try:
+
+        session = open_session()
 
         userData = session.query(Utilizator).filter(Utilizator.id == id).first()
 
@@ -142,6 +162,9 @@ def get_info_user_repo(id):
 
         raise Exception(f"Error while fetching user: {str(e)}")
 
+    finally:
+
+        session.close()
 
 
 
@@ -149,6 +172,8 @@ def get_info_user_repo(id):
 def get_users_repo():
     """Retrieve a list of students from the database using the SQLAlchemy session."""
     try:
+
+        session = open_session()
 
         students = session.query(Student).all()
 
@@ -173,9 +198,15 @@ def get_users_repo():
 
         raise Exception(f"Error while fetching users: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_user_by_id_repo(id):
 
     try:
+
+        session = open_session()
 
         user = session.query(Utilizator).filter(Utilizator.id == id).first()
 
@@ -188,3 +219,7 @@ def get_user_by_id_repo(id):
     except Exception as e:
 
         raise Exception(f"Error while fetching user: {str(e)}")
+
+    finally:
+
+        session.close()

@@ -1,15 +1,15 @@
 import uuid
 from Domain.Entities.grupa import Grupe
 from Domain.Entities.student import Student
-from Domain.extensions import session
+from Domain.extensions import open_session
 from sqlalchemy.exc import IntegrityError
 from Domain.Entities.secretar import Secretar
 
-def add_secretar_repo(secretar_data):
+def add_secretar_repo(secretar_data,session):
 
     secretar = Secretar(secretar_data['id'], secretar_data['nume'], secretar_data['telefon'])
     session.add(secretar)
-def add_grupa_repo(grupa_data):
+def add_grupa_repo(grupa_data,session):
 
     grupa = Grupe(grupa_data['id'], grupa_data['grupa'])
     session.add(grupa)
@@ -20,9 +20,11 @@ def create_grupa_repo(grupa_data):
 
     try:
 
+        session = open_session()
+
         grupa_data['id'] = grupa_id
 
-        add_grupa_repo(grupa_data)
+        add_grupa_repo(grupa_data,session)
 
         session.commit()
 
@@ -43,9 +45,15 @@ def create_grupa_repo(grupa_data):
         print(f"Error while inserting group: {e}")
         return {"message": f"An error occurred while creating the group: {e}"}, 500
 
+    finally:
+
+        session.close()
+
 def get_students_of_group_repo(grupaId):
 
     try:
+
+        session = open_session()
 
         students = session.query(Student).filter(Student.idgrupa == grupaId).all()
 
@@ -73,3 +81,7 @@ def get_students_of_group_repo(grupaId):
     except Exception as e:
 
         return {"message": f"An error occurred while fetching students: {e}"}, 500
+
+    finally:
+
+        session.close()

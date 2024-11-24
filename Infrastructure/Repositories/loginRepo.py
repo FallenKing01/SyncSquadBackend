@@ -1,11 +1,14 @@
-from Domain.extensions import session
+from Domain.extensions import open_session
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token
 from Domain.Entities.utilizator import Utilizator
 from Utils.passwordhash import hash_password,verify_password
 
 def login_user(accountData):
+
     try:
+
+        session = open_session()
 
         username = accountData.get("username")
         password = accountData.get("parola")
@@ -49,3 +52,7 @@ def login_user(accountData):
     except Exception as e:
 
         return {"error": f"Error while logging in user: {str(e)}"}, 500
+
+    finally:
+
+        session.close()

@@ -1,14 +1,14 @@
 import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
-from Domain.extensions import session
+from Domain.extensions import open_session
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
 from Domain.Entities.saliCereri import SaliCereri
 from datetime import datetime,timedelta
 from Domain.Entities.sala import Sali
 
-def add_profesor_repo(profesor_data):
+def add_profesor_repo(profesor_data,session):
 
     profesor = Profesor(profesor_data['id'], profesor_data['nume'], profesor_data['telefon'], profesor_data['departament'])
     session.add(profesor)
@@ -17,6 +17,8 @@ def add_profesor_repo(profesor_data):
 def get_profesori_repo():
 
     try:
+
+        session = open_session()
 
         profesori = session.query(Profesor).all()
 
@@ -34,13 +36,20 @@ def get_profesori_repo():
         return profesori_list
 
     except Exception as e:
+
         raise Exception(f"Error while getting profesori: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 
 def accept_examen_by_profesor_repo(exam_data):
 
     try:
+
+        session = open_session()
 
         examen = session.query(Examene).filter(Examene.id == exam_data['id']).first()
         idSalaCerere = str(uuid.uuid4())
@@ -65,9 +74,15 @@ def accept_examen_by_profesor_repo(exam_data):
 
         raise Exception(f"Error while accepting examen: {str(e)}")
 
+    finally:
+
+        session.close()
+
 def get_orar_of_prof_repo(prof_id,data):
 
     try:
+
+        session = open_session()
 
         examene = session.query(Examene).filter(Examene.profesorid == prof_id,Examene.starea==Status.APPROVED.name.lower(),Examene.data==data).all()
 
@@ -108,6 +123,10 @@ def get_orar_of_prof_repo(prof_id,data):
     except Exception as e:
 
         raise Exception(f"Error while getting orar of profesor: {str(e)}")
+
+    finally:
+
+        session.close()
 
 
 
