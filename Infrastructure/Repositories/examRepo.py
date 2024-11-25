@@ -18,6 +18,11 @@ def add_examen_repo(exam_data,session):
     exam = Examene(Id=exam_data["id"],SefId=exam_data["sefid"],ProfesorId=exam_data["profesorid"], MaterieId=exam_data["materieid"], Data=exam_data["data"],Starea=Status.PENDING.name.lower())
     session.add(exam)
 
+def add_examen_fortat_repo(exam_data,session):
+
+    exam = Examene(Id=exam_data["id"],SefId=exam_data["sefid"],ProfesorId=exam_data["profesorid"], MaterieId=exam_data["materieid"], Data=exam_data["data"],Starea=Status.APPROVED.name.lower(),OraStart=exam_data["orastart"],OraFinal=exam_data["orafinal"],ActualizatDe=exam_data["actualizatde"],AsistentId=exam_data["asistentid"],ActualizatLa=datetime.utcnow())
+    session.add(exam)
+
 def create_examen_repo(exam_data):
 
     id = str(uuid.uuid4())
@@ -458,6 +463,37 @@ def decline_examen_repo(examId,data):
         session.rollback()
 
         raise Exception(f"Error while rejecting exam: {str(e)}")
+
+    finally:
+
+        session.close()
+
+
+def create_examen_fortat(exam_data):
+
+    id = str(uuid.uuid4())
+
+    try:
+
+        session = open_session()
+
+        session = open_session()
+        exam_data["id"] = id
+
+        add_examen_fortat_repo(exam_data,session)
+
+        saliCereri = SaliCereri(str(uuid.uuid4()),idcerere=id,idsala=exam_data["salaid"])
+        session.add(saliCereri)
+
+        session.commit()
+
+        return {"message": "Exam added successfully"}, 201
+
+    except Exception as e:
+
+        session.rollback()
+
+        raise Exception(f"Error while inserting exam: {str(e)}")
 
     finally:
 

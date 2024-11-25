@@ -109,3 +109,18 @@ class declineExamen(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsExamen.route("/examenfortat")
+class createExamenFortat(Resource):
+    @nsExamen.expect(createExamenFortat)
+    def post(self):
+
+        try:
+
+            message = create_examen_fortat(api.payload)
+
+            return message
+
+        except Exception:
+
+            abort(500, "Something went wrong")
