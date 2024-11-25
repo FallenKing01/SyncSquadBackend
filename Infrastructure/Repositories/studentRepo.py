@@ -22,7 +22,11 @@ def update_student(grupaId,studentId):
         if existaSef is None:
 
             student = session.query(Student).filter(Student.id == studentId).first()
+            studentAcc = session.query(Utilizator).filter(Utilizator.id == studentId).first()
+
             student.sef = 1
+            studentAcc.rol = Role.SEF.name.lower()
+
             session.commit()
 
             return {"message": "Student updated successfully"}
@@ -30,7 +34,9 @@ def update_student(grupaId,studentId):
         else:
 
             currentSefId = existaSef.id
+            currentSefAcc = session.query(Utilizator).filter(Utilizator.id == currentSefId).first()
             existaSef.sef = 0
+            currentSefAcc.rol = Role.STUDENT.name.lower()
 
             session.query(Examene).filter(Examene.sefid == currentSefId).update(
                 {Examene.sefid: studentId},
@@ -39,6 +45,11 @@ def update_student(grupaId,studentId):
 
             session.query(Student).filter(Student.id == studentId).update(
                 {Student.sef: 1},
+                synchronize_session=False
+            )
+
+            session.query(Utilizator).filter(Utilizator.id == studentId).update(
+                {Utilizator.rol: Role.SEF.name.lower()},
                 synchronize_session=False
             )
 
