@@ -18,9 +18,6 @@ def add_examen_repo(exam_data,session):
     exam = Examene(Id=exam_data["id"],SefId=exam_data["sefid"],ProfesorId=exam_data["profesorid"], MaterieId=exam_data["materieid"], Data=exam_data["data"],Starea=Status.PENDING.name.lower())
     session.add(exam)
 
-
-
-
 def create_examen_repo(exam_data):
 
     id = str(uuid.uuid4())
@@ -271,6 +268,10 @@ def get_examene_grupa_repo(idGrupa):
         session = open_session()
 
         sefId = session.query(Student).filter(Student.idgrupa == idGrupa, Student.sef == True).first()
+
+        if sefId is None:
+
+            return
 
         examene = session.query(Examene).filter(Examene.sefid == sefId.id, Examene.starea == Status.APPROVED.name.lower()).all()
 
