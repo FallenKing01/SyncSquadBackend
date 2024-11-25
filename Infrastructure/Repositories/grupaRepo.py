@@ -87,3 +87,7 @@ def create_grupa_repo(data):
     finally:
 
         session.close()
+
+
+
+

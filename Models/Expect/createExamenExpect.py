@@ -38,7 +38,7 @@ declineExamen = api.model('Decline Examene', {
 
 createExamenFortat = api.model('Create Examene Fortat', {
     "profesorid": fields.String(required=True, description="ID of the professor in charge of the exam"),
-    "sefid": fields.String(required=True, description="ID of the chief examiner"),
+    "grupaid": fields.String(required=True, description="ID of the chief examiner"),
     "materieid": fields.String(required=False, description="ID of the subject"),
     "data": fields.Date(required=False, description="Date of the exam"),
     "asistentid": fields.String(required=False, description="ID of the assistant for the exam"),
