@@ -124,3 +124,19 @@ class createExamenFortat(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsExamen.route("/asistentdisponibil")
+class getAsistentDisponibil(Resource):
+    @nsExamen.expect(asistentDisponibil)
+    def post(self):
+
+        try:
+
+            asistenti = get_profesor_disponibil_repo(api.payload)
+
+            return asistenti
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
