@@ -12,6 +12,9 @@ from Domain.Entities.profesor import Profesor
 from datetime import datetime, date
 from Services.EmailSenderService import sendEmail
 from Domain.Entities.sala import Sali
+from Domain.Entities.asistent import Asistenti
+from sqlalchemy import asc
+
 
 def add_examen_repo(exam_data,session):
 
@@ -121,6 +124,9 @@ def get_approved_exams_of_profesor_repo(profesorId):
         exams = session.query(Examene).filter(
             Examene.profesorid == profesorId,
             Examene.starea == Status.APPROVED.name.lower()
+        ).order_by(
+            asc(Examene.data),
+            asc(Examene.orastart)
         ).all()
 
         examList = []
@@ -137,7 +143,6 @@ def get_approved_exams_of_profesor_repo(profesorId):
                 "tipevaluare": materia.tipevaluare,
             }
 
-            # Fetch Sef and Grupa
             sef = session.query(Student).filter(Student.id == exam.sefid).first()
             grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
 
@@ -161,7 +166,7 @@ def get_approved_exams_of_profesor_repo(profesorId):
 
             if exam.orafinal:
 
-                orafinal_time = datetime.combine(datetime.today(), exam.orafinal) + timedelta(minutes=1)
+                orafinal_time = datetime.combine(datetime.today(), exam.orafinal)
                 orafinal_serialized = orafinal_time.strftime("%H:%M")
 
             else:
@@ -284,7 +289,6 @@ def get_examene_grupa_repo(idGrupa):
 
         for examen in examene:
 
-            # Fetch Materie (Subject)
             materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
 
             materiaToAdd = {
@@ -295,7 +299,6 @@ def get_examene_grupa_repo(idGrupa):
                 "tipevaluare": materie.tipevaluare,
             }
 
-            # Fetch the Sef and their Grupa (Group)
             sef = session.query(Student).filter(Student.id == examen.sefid).first()
             grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
 
@@ -309,23 +312,25 @@ def get_examene_grupa_repo(idGrupa):
                 "grupa": grupa.grupa,
             }
 
-            # Convert the 'data' field to string (if it's a date)
             if isinstance(examen.data, (datetime, date)):
+
                 data_serialized = examen.data.strftime("%Y-%m-%d")
+
             else:
+
                 data_serialized = examen.data
 
-            # 'orastart' remains unchanged
             orastart_serialized = examen.orastart.strftime("%H:%M") if examen.orastart else None
 
-            # Add one minute to 'orafinal' time if it exists
             if examen.orafinal:
+
                 orafinal_time = datetime.combine(datetime.today(), examen.orafinal) + timedelta(minutes=1)
                 orafinal_serialized = orafinal_time.strftime("%H:%M")
+
             else:
+
                 orafinal_serialized = None
 
-            # Append exam data to list
             examList.append({
                 "id": examen.id,
                 "sef": sefData,
@@ -369,7 +374,6 @@ def get_examene_sef_semigrupa_stare(sef_id, starea):
                 "tipevaluare": materie.tipevaluare,
             }
 
-            # Fetch the Sef and their Grupa (Group)
             sef = session.query(Student).filter(Student.id == examen.sefid).first()
             grupa = session.query(Grupe).filter(Grupe.id == sef.idgrupa).first()
 
@@ -498,7 +502,76 @@ def create_examen_fortat(exam_data):
     finally:
 
         session.close()
+def has_time_conflict(existing_start, existing_end, requested_start, requested_end):
+    """
+    Check if there is any overlap between two time intervals:
+    [existing_start, existing_end] and [requested_start, requested_end].
+    """
+    return not (requested_end <= existing_start or requested_start >= existing_end)
 
+def get_profesor_disponibil_repo(examenData):
+    ## examenData = {"profesorid": "","data": "","orastart": "","orafinal": ""}
+    try:
+        session = open_session()
 
+        # Parse requested exam time
+        requested_start = datetime.strptime(examenData['orastart'], '%H:%M').time()
+        requested_end = datetime.strptime(examenData['orafinal'], '%H:%M').time()
 
+        print(f"Requested Time: {requested_start} - {requested_end}")
+
+        # Fetch the professor's data
+        profesor = session.query(Profesor).filter(Profesor.id == examenData['profesorid']).first()
+        if profesor is None:
+            raise Exception(f"Profesor with id {examenData['profesorid']} not found.")
+
+        # Fetch all assistants for this professor
+        asistenti = session.query(Asistenti).filter(Asistenti.idprof == examenData['profesorid']).all()
+        asistentiIds = [asistent.idasistent for asistent in asistenti]
+
+        # Fetch all approved exams for the requested date
+        exams_on_date = session.query(Examene).filter(
+            Examene.data == examenData['data'],
+            Examene.starea == Status.APPROVED.name.lower()
+        ).all()
+
+        print(f"Exams on {examenData['data']}: {[{'prof': ex.profesorid, 'asist': ex.asistentid, 'start': ex.orastart, 'end': ex.orafinal} for ex in exams_on_date]}")
+
+        available_ids = []
+
+        # Check availability for each assistant
+        for asistent_id in asistentiIds:
+
+            is_available = True
+
+            # Check for conflicts as assistant or professor
+            for exam in exams_on_date:
+                exam_start = exam.orastart  # Assuming datetime.time
+                exam_end = exam.orafinal  # Assuming datetime.time
+
+                # If assistant is involved in this exam
+                if exam.asistentid == asistent_id or exam.profesorid == asistent_id:
+                    if has_time_conflict(exam_start, exam_end, requested_start, requested_end):
+                        is_available = False
+                        break
+
+            if is_available:
+                available_ids.append(asistent_id)
+
+        available_prof_list = []
+        print(available_ids)
+
+        for prof_id in available_ids:
+            prof_data = session.query(Profesor).filter(Profesor.id == prof_id).first()
+            if prof_data:
+                available_prof_list.append({
+                    "nume": prof_data.nume,
+                    "id": prof_data.id
+                })
+
+        return available_prof_list
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
 

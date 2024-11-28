@@ -48,3 +48,9 @@ createExamenFortat = api.model('Create Examene Fortat', {
     "salaid": fields.String(required=True, description="ID of the room where the exam will take place"),
 })
 
+asistentDisponibil = api.model('Asistent Disponibil', {
+    "profesorid": fields.String(required=True, description="ID of the professor"),
+    "data": fields.Date(required=True, description="Date of the exam"),
+    "orastart": fields.String(required=True, description="Start time of the exam"),
+    "orafinal": fields.String(required=True, description="End time of the exam"),
+})

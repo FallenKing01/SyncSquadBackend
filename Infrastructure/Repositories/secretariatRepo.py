@@ -38,11 +38,10 @@ def create_grupa_repo(grupa_data):
 
             return {"message": "A group with this name already exists."}, 409
 
-
     except Exception as e:
 
         session.rollback()
-        print(f"Error while inserting group: {e}")
+
         return {"message": f"An error occurred while creating the group: {e}"}, 500
 
     finally:
