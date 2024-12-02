@@ -490,7 +490,7 @@ def create_examen_fortat(exam_data):
 
         if sef_data is None:
 
-            return {"message": "Group leader not found"},406
+            return {"message": "Group leader not found"},418
 
         exam_data["sefid"] = sef_data.id
 
