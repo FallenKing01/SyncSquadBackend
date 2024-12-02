@@ -486,7 +486,13 @@ def create_examen_fortat(exam_data):
         session = open_session()
 
         exam_data["id"] = id
-        exam_data["sefid"] = session.query(Student).filter(Student.idgrupa == exam_data["grupaid"], Student.sef == True).first().id
+        sef_data = session.query(Student).filter(Student.idgrupa == exam_data["grupaid"], Student.sef == True).first()
+
+        if sef_data is None:
+
+            return {"message": "Group leader not found"},406
+
+        exam_data["sefid"] = sef_data.id
 
         add_examen_fortat_repo(exam_data,session)
 
