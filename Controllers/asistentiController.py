@@ -43,7 +43,8 @@ class DeleteAsistent(Resource):
 
             message = delete_asistent_repo(asistent_id, profesor_id)
 
-            return message, 200
+
+            return message
 
         except Exception as e:
 
