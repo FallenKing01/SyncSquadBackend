@@ -324,7 +324,7 @@ def get_examene_grupa_repo(idGrupa):
 
             if examen.orafinal:
 
-                orafinal_time = datetime.combine(datetime.today(), examen.orafinal) + timedelta(minutes=1)
+                orafinal_time = datetime.combine(datetime.today(), examen.orafinal)
                 orafinal_serialized = orafinal_time.strftime("%H:%M")
 
             else:
@@ -352,14 +352,18 @@ def get_examene_grupa_repo(idGrupa):
 
             session.close()
 
-def get_examene_sef_semigrupa_stare(sef_id, starea):
+def get_examene_sef_semigrupa_stare(student_id, starea):
 
     try:
 
         session = open_session()
 
+        grupa_stud = session.query(Student).filter(Student.id == student_id).first()
+        print(grupa_stud.idgrupa)
+        sef_id = session.query(Student).filter(Student.idgrupa == grupa_stud.idgrupa, Student.sef == True).first().id
+        print(sef_id)
         examene = session.query(Examene).filter(Examene.sefid == sef_id, Examene.starea == starea).all()
-
+        print(examene)
         examList = []
 
         for examen in examene:
@@ -398,7 +402,7 @@ def get_examene_sef_semigrupa_stare(sef_id, starea):
 
             # Add one minute to 'orafinal' time if it exists
             if examen.orafinal:
-                orafinal_time = datetime.combine(datetime.today(), examen.orafinal) + timedelta(minutes=1)
+                orafinal_time = datetime.combine(datetime.today(), examen.orafinal)
                 orafinal_serialized = orafinal_time.strftime("%H:%M")
             else:
                 orafinal_serialized = None
@@ -503,15 +507,13 @@ def create_examen_fortat(exam_data):
 
         session.close()
 def has_time_conflict(existing_start, existing_end, requested_start, requested_end):
-    """
-    Check if there is any overlap between two time intervals:
-    [existing_start, existing_end] and [requested_start, requested_end].
-    """
+
     return not (requested_end <= existing_start or requested_start >= existing_end)
 
 def get_profesor_disponibil_repo(examenData):
-    ## examenData = {"profesorid": "","data": "","orastart": "","orafinal": ""}
+
     try:
+
         session = open_session()
 
         # Parse requested exam time
@@ -556,14 +558,17 @@ def get_profesor_disponibil_repo(examenData):
                         break
 
             if is_available:
+
                 available_ids.append(asistent_id)
 
         available_prof_list = []
-        print(available_ids)
 
         for prof_id in available_ids:
+
             prof_data = session.query(Profesor).filter(Profesor.id == prof_id).first()
+
             if prof_data:
+
                 available_prof_list.append({
                     "nume": prof_data.nume,
                     "id": prof_data.id
@@ -572,6 +577,6 @@ def get_profesor_disponibil_repo(examenData):
         return available_prof_list
 
     except Exception as e:
-        print(f"Error: {e}")
+
         return []
 
