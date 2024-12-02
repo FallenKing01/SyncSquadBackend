@@ -3,6 +3,7 @@ from Utils.constants import SALI_URL,PROFESORI_URL
 import requests
 import uuid
 from Domain.Entities.sala import Sali
+from Domain.Entities.examen import Examene
 from Domain.Entities.profesor import Profesor
 
 
@@ -88,3 +89,8 @@ def insert_profesori_from_api_repo():
     finally:
 
         session.close()
+
+def generate_pdf_secretariat_repo():
+
+    pass
+

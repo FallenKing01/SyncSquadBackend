@@ -93,7 +93,7 @@ def delete_asistent_repo(asistent_id, profesor_id):
 
         if examene is not None:
 
-            return {"message":"Asistentul are examene asignate si nu poate fi sters"}
+            return {"message":"Asistentul are examene asignate si nu poate fi sters"}, 418
 
 
         if asistent is None:

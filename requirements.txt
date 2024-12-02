@@ -9,3 +9,4 @@ pyodbc
 bcrypt==4.2.0
 SQLAlchemy==2.0.36
 requests
+fpdf2
