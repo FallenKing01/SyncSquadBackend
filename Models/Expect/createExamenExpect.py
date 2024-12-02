@@ -31,7 +31,7 @@ updateExamen = api.model('Reprogrameaza examen', {
 
 })
 
-declineExamen = api.model('Decline Examene', {
+declineExamenExp = api.model('Decline Examene', {
 
     "motiv": fields.String(required=True, description="Reason for declining the exam"),
 })

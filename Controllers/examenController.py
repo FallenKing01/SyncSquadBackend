@@ -97,7 +97,7 @@ class getExamenByStare(Resource):
 
 @nsExamen.route("/refuzaexamen/<string:examenId>")
 class declineExamen(Resource):
-    @nsExamen.expect(declineExamen)
+    @nsExamen.expect(declineExamenExp)
     def delete(self, examenId):
 
         try:
@@ -140,3 +140,17 @@ class getAsistentDisponibil(Resource):
 
             abort(500, "Something went wrong")
 
+@nsExamen.route("/stergeexamen/<string:examenId>")
+class deleteExamen(Resource):
+    @nsExamen.expect(declineExamenExp)
+    def delete(self, examenId):
+
+        try:
+
+            delete_examen_programat_repo(examenId,api.payload)
+
+            return {"message": "Examen deleted successfully"}
+
+        except Exception:
+
+            abort(500, "Something went wrong")

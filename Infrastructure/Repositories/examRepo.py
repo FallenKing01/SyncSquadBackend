@@ -586,3 +586,40 @@ def get_profesor_disponibil_repo(examenData):
 
         return []
 
+    finally:
+
+        session.close()
+def delete_examen_programat_repo(examen_id, data):
+    try:
+        session = open_session()
+
+        # Fetch the exam
+        examen = session.query(Examene).filter(Examene.id == examen_id).first()
+        if examen is None:
+            raise Exception(f"Examen with id {examen_id} not found.")
+
+        # Notify the student
+        sefid = examen.sefid
+        acc_student = session.query(Utilizator).filter(Utilizator.id == sefid).first()
+        email_to_send = {
+            "text": f"Examenul la materia {examen.materieid} a fost anulat. Motivul: {data['motiv']}",
+            "titlu": "Anulare examen",
+            "email": acc_student.email,
+        }
+        sendEmail(email_to_send)
+
+        # Delete related SaliCereri entries
+        session.query(SaliCereri).filter(SaliCereri.idcerere == examen_id).delete()
+
+        # Delete the exam
+        session.delete(examen)
+
+        session.commit()
+        return {"message": "Examen deleted successfully"}, 200
+
+    except Exception as e:
+        session.rollback()
+        raise Exception(f"Error while deleting exam: {str(e)}")
+
+    finally:
+        session.close()
