@@ -3,7 +3,7 @@ from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
 from Domain.Entities.asistent import Asistenti
 from Domain.extensions import open_session
-
+from Domain.Entities.examen import Examene
 
 
 def create_asistent_repo(titularId , asistentId):
@@ -85,11 +85,19 @@ def delete_asistent_repo(asistent_id, profesor_id):
         session = open_session()
 
         asistent = session.query(Asistenti).filter(
-            Asistenti.id == asistent_id,
+            Asistenti.idasistent == asistent_id,
             Asistenti.idprof == profesor_id
         ).first()
 
+        examene = session.query(Examene).filter(Examene.asistentid == asistent_id).all()
+
+        if examene is not None:
+
+            return {"message":"Asistentul are examene asignate si nu poate fi sters"}
+
+
         if asistent is None:
+
             raise Exception(f"Asistent with id '{asistent_id}' and profesor id '{profesor_id}' not found.")
 
         session.delete(asistent)
