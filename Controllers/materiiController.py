@@ -78,3 +78,17 @@ class get_materii_fara_examen(Resource):
         except Exception:
 
             abort(500, "Something went wrong")
+
+@nsMaterii.route("/materiineprogramatedupagrupa/<string:grupaId>/<string:profesorId>")
+class get_materii_neprogramate_dupa_grupa(Resource):
+    def get(self, grupaId, profesorId):
+
+        try:
+
+            subjects = get_materii_neprogramate_dupa_grupa_repo(grupaId, profesorId)
+
+            return subjects
+
+        except Exception:
+
+            abort(500, "Something went wrong")
