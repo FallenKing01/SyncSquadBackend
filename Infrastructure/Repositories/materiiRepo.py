@@ -1,6 +1,8 @@
+from datetime import datetime
 import uuid
 from Domain.Entities.materie import Materii
 from Domain.Entities.profesor import Profesor
+from Domain.Entities.student import Student
 from Domain.extensions import open_session
 from Domain.Entities.examen import Examene
 from Utils.enums.statusExam import Status
@@ -155,6 +157,48 @@ def get_materii_examene_neprogramate_repo(profesorId, studentId):
         subjects_list = []
 
         examene = session.query(Examene).filter(Examene.sefid == studentId,Examene.starea != Status.REJECTED.name.lower()).all()
+
+        materii_cu_examene_ids = []
+
+        for examen in examene:
+
+            materii_cu_examene_ids.append(examen.materieid)
+
+        for subject in subjects:
+
+                if subject.id not in materii_cu_examene_ids:
+
+                    subject_dict = {
+                        "subjectId": subject.id,
+                        "nume": subject.nume,
+                        "abreviere" : subject.abreviere,
+                        "tipEvaluare" : subject.tipevaluare,
+                        "numarCredite" : subject.numarcredite,
+                    }
+
+                    subjects_list.append(subject_dict)
+
+        return subjects_list
+
+    except Exception as e:
+
+        raise Exception(f"Error while getting subjects of professor: {str(e)}")
+
+    finally:
+
+        session.close()
+
+def get_materii_neprogramate_dupa_grupa_repo(grupaId, profesorId):
+
+    try:
+
+        session = open_session()
+
+        subjects = session.query(Materii).filter(Materii.profesorid == profesorId).all()
+        subjects_list = []
+
+        examene = session.query(Examene).join(Student, Examene.sefid == Student.id).filter(Examene.starea != Status.REJECTED.name.lower(), 
+        Student.idgrupa == grupaId).all()
 
         materii_cu_examene_ids = []
 
