@@ -137,6 +137,14 @@ def get_approved_exams_of_profesor_repo(profesorId):
             salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == exam.id).first()
             idSala = salaCerere.idsala
             dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            asistentId = exam.asistentid
+            asistentData = session.query(Profesor).filter(Profesor.id == asistentId).first()
+            asistentToAdd = {
+                "id": asistentData.id,
+                "nume": asistentData.nume,
+                "telefon": asistentData.telefon,
+            }
+
             salaToAdd = {
                 "id": dateSala.id,
                 "nume": dateSala.nume,
@@ -191,7 +199,8 @@ def get_approved_exams_of_profesor_repo(profesorId):
                 "starea": exam.starea,
                 "orastart": orastart_serialized,
                 "orafinal": orafinal_serialized,
-                "sala": salaToAdd
+                "sala": salaToAdd,
+                "asistent": asistentToAdd
             })
 
         return examList, 200
@@ -303,6 +312,14 @@ def get_examene_grupa_repo(idGrupa):
             salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == examen.id).first()
             idSala = salaCerere.idsala
             dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            asistentId = examen.asistentid
+            asistentData = session.query(Profesor).filter(Profesor.id == asistentId).first()
+            asistentToAdd = {
+                "id": asistentData.id,
+                "nume": asistentData.nume,
+                "telefon": asistentData.telefon,
+            }
+
             salaToAdd = {
                 "id": dateSala.id,
                 "nume": dateSala.nume,
@@ -359,7 +376,8 @@ def get_examene_grupa_repo(idGrupa):
                 "starea": examen.starea,
                 "orastart": orastart_serialized,
                 "orafinal": orafinal_serialized,
-                "sala": salaToAdd
+                "sala": salaToAdd,
+                "asistent": asistentToAdd
             })
 
         return examList, 200
@@ -389,6 +407,16 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
             salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == examen.id).first()
             idSala = salaCerere.idsala
             dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            asistentId = examen.asistentid
+
+            asistentData = session.query(Profesor).filter(Profesor.id == asistentId).first()
+            asistentToAdd = {
+                "id": asistentData.id,
+                "nume": asistentData.nume,
+                "telefon": asistentData.telefon,
+            }
+
+
             salaToAdd = {
                 "id": dateSala.id,
                 "nume": dateSala.nume,
@@ -443,7 +471,8 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
                 "starea": examen.starea,
                 "orastart": orastart_serialized,
                 "orafinal": orafinal_serialized,
-                "sala": salaToAdd
+                "sala": salaToAdd,
+                "asistent": asistentToAdd
             })
 
         return examList, 200
