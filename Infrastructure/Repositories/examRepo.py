@@ -291,7 +291,7 @@ def get_examene_grupa_repo(idGrupa):
 
         if sefId is None:
 
-            return
+            return {"message": "Group leader not found"}, 418
 
         examene = session.query(Examene).filter(Examene.sefid == sefId.id, Examene.starea == Status.APPROVED.name.lower()).all()
 
