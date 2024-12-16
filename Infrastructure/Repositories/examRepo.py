@@ -134,6 +134,15 @@ def get_approved_exams_of_profesor_repo(profesorId):
         for exam in exams:
 
             materia = session.query(Materii).filter(Materii.id == exam.materieid).first()
+            salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == exam.id).first()
+            idSala = salaCerere.idsala
+            dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            salaToAdd = {
+                "id": dateSala.id,
+                "nume": dateSala.nume,
+                "cladire": dateSala.cladire,
+                "abreviere":dateSala.abreviere
+            }
 
             materiaToAdd = {
                 "id": materia.id,
@@ -181,7 +190,8 @@ def get_approved_exams_of_profesor_repo(profesorId):
                 "data": data_serialized,
                 "starea": exam.starea,
                 "orastart": orastart_serialized,
-                "orafinal": orafinal_serialized
+                "orafinal": orafinal_serialized,
+                "sala": salaToAdd
             })
 
         return examList, 200
@@ -290,6 +300,15 @@ def get_examene_grupa_repo(idGrupa):
         for examen in examene:
 
             materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
+            salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == examen.id).first()
+            idSala = salaCerere.idsala
+            dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            salaToAdd = {
+                "id": dateSala.id,
+                "nume": dateSala.nume,
+                "cladire": dateSala.cladire,
+                "abreviere":dateSala.abreviere
+            }
 
             materiaToAdd = {
                 "id": materie.id,
@@ -339,7 +358,8 @@ def get_examene_grupa_repo(idGrupa):
                 "data": data_serialized,
                 "starea": examen.starea,
                 "orastart": orastart_serialized,
-                "orafinal": orafinal_serialized
+                "orafinal": orafinal_serialized,
+                "sala": salaToAdd
             })
 
         return examList, 200
