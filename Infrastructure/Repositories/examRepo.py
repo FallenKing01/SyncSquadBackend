@@ -359,16 +359,22 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
         session = open_session()
 
         grupa_stud = session.query(Student).filter(Student.id == student_id).first()
-        print(grupa_stud.idgrupa)
         sef_id = session.query(Student).filter(Student.idgrupa == grupa_stud.idgrupa, Student.sef == True).first().id
-        print(sef_id)
         examene = session.query(Examene).filter(Examene.sefid == sef_id, Examene.starea == starea).all()
-        print(examene)
         examList = []
 
         for examen in examene:
 
             materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
+            salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == examen.id).first()
+            idSala = salaCerere.idsala
+            dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+            salaToAdd = {
+                "id": dateSala.id,
+                "nume": dateSala.nume,
+                "cladire": dateSala.cladire,
+                "abreviere":dateSala.abreviere
+            }
 
             materiaToAdd = {
                 "id": materie.id,
@@ -416,7 +422,8 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
                 "data": data_serialized,
                 "starea": examen.starea,
                 "orastart": orastart_serialized,
-                "orafinal": orafinal_serialized
+                "orafinal": orafinal_serialized,
+                "sala": salaToAdd
             })
 
         return examList, 200
