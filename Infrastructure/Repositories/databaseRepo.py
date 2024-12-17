@@ -194,3 +194,7 @@ def generate_pdf_secretariat_repo():
 
     finally:
         session.close()
+
+
+def insert_grupe_from_api():
+    pass
