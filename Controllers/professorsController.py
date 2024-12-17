@@ -3,7 +3,6 @@ from flask_restx import abort
 from Models.Expect.createExamenExpect import *
 from Domain.extensions import api,authorizations
 from Infrastructure.Repositories.professorRepo import *
-
 nsProfessor = Namespace("profesor", description="Professor related operations",authorizations=authorizations)
 
 
@@ -47,6 +46,21 @@ class getOrar(Resource):
             orar = get_orar_of_prof_repo(prof_id,data)
 
             return orar
+
+        except Exception:
+
+            abort(500, "Something went wrong")
+
+@nsProfessor.route("/profesoriancurent/<string:grupa_id>")
+class getExamene(Resource):
+
+    def get(self,grupa_id):
+
+        try:
+
+            examene = get_profesori_from_api(grupa_id)
+
+            return examene
 
         except Exception:
 

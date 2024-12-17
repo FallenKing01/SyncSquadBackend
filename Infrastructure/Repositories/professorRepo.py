@@ -7,6 +7,7 @@ from Utils.enums.statusExam import Status
 from Domain.Entities.saliCereri import SaliCereri
 from datetime import datetime,timedelta
 from Domain.Entities.sala import Sali
+import requests
 
 def add_profesor_repo(profesor_data,session):
 
@@ -77,6 +78,60 @@ def accept_examen_by_profesor_repo(exam_data):
     finally:
 
         session.close()
+
+
+
+
+def get_profesori_from_api(idgrupa):
+    """
+    Fetches the list of professor IDs from the API based on group ID.
+
+    Args:
+        idgrupa (str/int): The group ID to fetch professor data for.
+
+    Returns:
+        list: A list of unique professor IDs.
+    """
+    # Define API URL
+    ORAR_GRUPA_URL = f"https://orar.usv.ro/orar/vizualizare/data/orarSPG.php?ID={idgrupa}&mod=grupa&json"
+    session = open_session()
+
+    try:
+
+        response = requests.get(ORAR_GRUPA_URL)
+
+        data_list = response.json()
+        id_profesori = []
+        data_list = data_list[0]
+        for i in range(len(data_list)):
+
+            if data_list[i]["typeLongName"] in ["curs", "proiect"]:
+
+                id_prof_curent = data_list[i]["teacherID"]
+
+                if id_prof_curent not in id_profesori:
+                    id_profesori.append(id_prof_curent)
+
+
+        data_profesor = []
+
+        for id in id_profesori:
+
+            prof_data = session.query(Profesor).filter(Profesor.id == id).first()
+            if prof_data is not None:
+                data_profesor.append({
+                    "id": prof_data.id,
+                    "nume": prof_data.nume,
+                    "telefon": prof_data.telefon,
+                    "departament": prof_data.departament
+                })
+
+        return data_profesor
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data from API: {e}")
+        return []
+
 
 def get_orar_of_prof_repo(prof_id,data):
 
