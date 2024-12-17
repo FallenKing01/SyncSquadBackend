@@ -401,28 +401,34 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
         examene = session.query(Examene).filter(Examene.sefid == sef_id, Examene.starea == starea).all()
         examList = []
 
+
         for examen in examene:
 
             materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
             salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == examen.id).first()
-            idSala = salaCerere.idsala
-            dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+
+            if salaCerere is not None:
+
+                idSala = salaCerere.idsala
+                dateSala =  session.query(Sali).filter(Sali.id == idSala).first()
+                salaToAdd = {
+                    "id": dateSala.id,
+                    "nume": dateSala.nume,
+                    "cladire": dateSala.cladire,
+                    "abreviere": dateSala.abreviere
+                }
+
             asistentId = examen.asistentid
+            if asistentId is not None:
 
-            asistentData = session.query(Profesor).filter(Profesor.id == asistentId).first()
-            asistentToAdd = {
-                "id": asistentData.id,
-                "nume": asistentData.nume,
-                "telefon": asistentData.telefon,
-            }
+                asistentData = session.query(Profesor).filter(Profesor.id == asistentId).first()
+                asistentToAdd = {
+                    "id": asistentData.id,
+                    "nume": asistentData.nume,
+                    "telefon": asistentData.telefon,
+                }
 
 
-            salaToAdd = {
-                "id": dateSala.id,
-                "nume": dateSala.nume,
-                "cladire": dateSala.cladire,
-                "abreviere":dateSala.abreviere
-            }
 
             materiaToAdd = {
                 "id": materie.id,
@@ -461,19 +467,31 @@ def get_examene_sef_semigrupa_stare(student_id, starea):
             else:
                 orafinal_serialized = None
 
-            # Append exam data to list
-            examList.append({
-                "id": examen.id,
-                "sef": sefData,
-                "profesorid": examen.profesorid,
-                "materie": materiaToAdd,
-                "data": data_serialized,
-                "starea": examen.starea,
-                "orastart": orastart_serialized,
-                "orafinal": orafinal_serialized,
-                "sala": salaToAdd,
-                "asistent": asistentToAdd
-            })
+            if salaCerere is not None:
+                examList.append({
+                    "id": examen.id,
+                    "sef": sefData,
+                    "profesorid": examen.profesorid,
+                    "materie": materiaToAdd,
+                    "data": data_serialized,
+                    "starea": examen.starea,
+                    "orastart": orastart_serialized,
+                    "orafinal": orafinal_serialized,
+                    "sala": salaToAdd,
+                    "asistent": asistentToAdd
+                })
+            else:
+                examList.append({
+                    "id": examen.id,
+                    "sef": sefData,
+                    "profesorid": examen.profesorid,
+                    "materie": materiaToAdd,
+                    "data": data_serialized,
+                    "starea": examen.starea,
+                    "orastart": orastart_serialized,
+                    "orafinal": orafinal_serialized,
+                })
+
 
         return examList, 200
 
