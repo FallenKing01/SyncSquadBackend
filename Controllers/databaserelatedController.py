@@ -31,6 +31,24 @@ class generatePdf(Resource):
         try:
 
             generate_pdf_secretariat_repo()
+
             return {"message": "PDF generated successfully!"}
+
         except Exception:
+
+            abort(500, "Something went wrong")
+
+@nsDatabase.route("/addgroups")
+class addgroups(Resource):
+
+    def post(self):
+
+        try:
+
+            insert_grupe_repo()
+
+            return {"message":"Grupele au fost adaugate cu succes"}
+
+        except Exception:
+
             abort(500, "Something went wrong")

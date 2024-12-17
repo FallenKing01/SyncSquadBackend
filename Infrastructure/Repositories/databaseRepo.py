@@ -1,5 +1,7 @@
+from sqlalchemy.exc import SQLAlchemyError
+
 from Domain.extensions import open_session
-from Utils.constants import SALI_URL,PROFESORI_URL
+from Utils.constants import SALI_URL,PROFESORI_URL,GRUPE_URL
 import requests
 import uuid
 from Domain.Entities.sala import Sali
@@ -9,8 +11,11 @@ from Domain.Entities.grupa import Grupe
 from Domain.Entities.student import Student
 from Domain.Entities.materie import Materii
 from Domain.Entities.saliCereri import SaliCereri
+from Domain.Entities.utilizator import Utilizator
 from fpdf import FPDF
 import os
+from Utils.passwordhash import hash_password
+import random
 
 class PDF(FPDF):
     def header(self):
@@ -64,13 +69,50 @@ def insert_database_sali_from_api_repo():
 
         session.close()
 
+def insert_grupe_repo():
+    """
+    Fetch group data from an API and insert unique groups into the database.
+    Only groups with specializationShortName == "C" are considered.
+    """
+    try:
+        response = requests.get(GRUPE_URL)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        data_list = response.json()  # Parse JSON response
+
+
+        session = open_session()
+        group_list = []
+
+        for record in data_list:
+            if record.get("specializationShortName") == "C":  # Filter only 'C' groups
+                group_name = record.get("groupName")
+                group_id = str(record.get("id"))  # Ensure ID is a string
+
+                # Check if the group is already in the list
+                if not any(gr["groupName"] == group_name for gr in group_list):
+                    # Add the group to the local list to track uniqueness
+                    group_list.append({"groupName": group_name, "id": group_id})
+
+                    # Insert the group into the database
+                    grupa = Grupe(id=group_id, grupa=group_name)
+                    session.add(grupa)
+
+        session.commit()
+
+    except Exception as e:
+
+        session.rollback()
+
+    finally:
+        session.close()
+
 def insert_profesori_from_api_repo():
 
     response = requests.get(PROFESORI_URL)
     data_list = response.json()
+    departamente = ["Calculatoare","Automatica","Electronica"]
 
     try:
-
         session = open_session()
         count = 0
 
@@ -80,36 +122,52 @@ def insert_profesori_from_api_repo():
                 record.get('facultyName') == "Facultatea de Inginerie Electrică şi Ştiinţa Calculatoarelor"
                 and count < 50
             ):
-
+                # Extract and clean data
                 last_name = record.get('lastName', '').strip()
                 first_name = record.get('firstName', '').strip()
+                email = record.get('emailAddress', '').strip()  # Use correct email key
 
-                if not last_name or not first_name:
-
+                # Skip records with missing names or emails
+                if not last_name or not first_name or not email:
                     continue
 
+                # Generate unique ID for both tables
+                ##profesor_id = str(uuid.uuid4())
+                profesor_id = str(record.get('id'))
                 full_name = f"{last_name} {first_name}"
 
+                # Insert into Profesor table
                 profesor_entry = Profesor(
-                    str(uuid.uuid4()),
-                    full_name,
-                    None,
-                    None
+                    id=profesor_id,
+                    nume=full_name,
+                    telefon=None,  # Default to None
+                    departament=random.choice(departamente)
                 )
-
                 session.add(profesor_entry)
+
+                # Insert into Utilizator table
+                password = hash_password("parola").decode('utf-8')
+                utilizator_entry = Utilizator(
+                    id=profesor_id,
+                    email=email,
+                    parola=password,
+                    rol="profesor"
+                )
+                session.add(utilizator_entry)
 
                 count += 1
 
         session.commit()
 
     except Exception as e:
-
-        session.rollback()
+        print(f"Error: {e}")
+        session.rollback()  # Rollback in case of error
 
     finally:
-
         session.close()
+        print("Session closed.")
+
+
 
 def generate_pdf_secretariat_repo():
 
@@ -165,9 +223,8 @@ def generate_pdf_secretariat_repo():
         # Center header row
         for i, header in enumerate(headers):
             pdf.cell(column_widths[i], 8, header, border=1, fill=True, align='C')
-        pdf.ln()  # Line break
+        pdf.ln()
 
-        # Add table rows with multi_cell for better text wrapping
         pdf.set_font("Arial", size=8)
         for row in examene_list:
             pdf.cell(column_widths[0], 8, row["nume_grupa"], border=1, align='C')
@@ -178,23 +235,20 @@ def generate_pdf_secretariat_repo():
             pdf.cell(column_widths[5], 8, str(row["ora_start"]), border=1, align='C')
             pdf.cell(column_widths[6], 8, str(row["ora_final"]), border=1, align='C')
             pdf.cell(column_widths[7], 8, row["nume_sala"], border=1, align='C')
-            pdf.ln()  # Next row
+            pdf.ln()
 
-        # Save the PDF
         downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
         pdf_path = os.path.join(downloads_path, "examene_list.pdf")
 
-        # Output the PDF to the specified path
         pdf.output(pdf_path)
         print(f"PDF saved successfully at {pdf_path}")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+
         session.rollback()
 
     finally:
+
         session.close()
 
 
-def insert_grupe_from_api():
-    pass
