@@ -700,75 +700,75 @@ def delete_examen_programat_repo(examen_id, data):
 
 
 
-# def get_info_examen_repo(id):
-#
-#     try:
-#         session = open_session()
-#
-#         # Fetch the exam record
-#         examen = session.query(Examene).filter(Examene.id == id).first()
-#         if examen is None:
-#             return {"message": "Examen not found"}, 404
-#
-#         # Fetch related data
-#         sef = session.query(Student).filter(Student.id == examen.sefid).first()
-#         profesor = session.query(Profesor).filter(Profesor.id == examen.profesorid).first()
-#         materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
-#         asistent = session.query(Profesor).filter(Profesor.id == examen.asistentid).first()
-#         salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == id).first()
-#         sala = session.query(Sali).filter(Sali.id == salaCerere.idsala).first() if salaCerere else None
-#
-#         # Validate related objects
-#         if not all([sef, profesor, materie, asistent, sala]):
-#             return {"message": "Related data not found for exam"}, 404
-#
-#         # Prepare response
-#         examen_data = {
-#             "id": examen.id,
-#             "sef": {
-#                 "id": sef.id,
-#                 "nume": sef.nume,
-#                 "telefon": sef.telefon,
-#                 "facultatea": sef.facultatea,
-#                 "specializarea": sef.specializarea,
-#                 "idgrupa": sef.idgrupa
-#             },
-#             "profesor": {
-#                 "id": profesor.id,
-#                 "nume": profesor.nume,
-#                 "telefon": profesor.telefon
-#             },
-#             "materie": {
-#                 "id": materie.id,
-#                 "nume": materie.nume,
-#                 "credite": materie.numarcredite,
-#                 "abreviere": materie.abreviere,
-#                 "tipevaluare": materie.tipevaluare
-#             },
-#             "data": examen.data.strftime("%Y-%m-%d"),  # Format the date as a string
-#             "starea": examen.starea,
-#             "orastart": examen.orastart.strftime("%H:%M"),  # Format time as HH:MM
-#             "orafinal": examen.orafinal.strftime("%H:%M"),  # Format time as HH:MM
-#             "asistent": {
-#                 "id": asistent.id,
-#                 "nume": asistent.nume,
-#                 "telefon": asistent.telefon
-#             },
-#             "sala": {
-#                 "id": sala.id,
-#                 "nume": sala.nume,
-#                 "cladire": sala.cladire,
-#                 "abreviere": sala.abreviere
-#             }
-#         }
-#
-#         return examen_data, 200
-#
-#     except Exception as e:
-#         return {"message": f"Unexpected error: {str(e)}"}, 500
-#
-#     finally:
-#         session.close()
+def get_info_examen_repo(id):
+
+    try:
+        session = open_session()
+
+        # Fetch the exam record
+        examen = session.query(Examene).filter(Examene.id == id).first()
+        if examen is None:
+            return {"message": "Examen not found"}, 404
+
+        # Fetch related data
+        sef = session.query(Student).filter(Student.id == examen.sefid).first()
+        profesor = session.query(Profesor).filter(Profesor.id == examen.profesorid).first()
+        materie = session.query(Materii).filter(Materii.id == examen.materieid).first()
+        asistent = session.query(Profesor).filter(Profesor.id == examen.asistentid).first()
+        salaCerere = session.query(SaliCereri).filter(SaliCereri.idcerere == id).first()
+        sala = session.query(Sali).filter(Sali.id == salaCerere.idsala).first() if salaCerere else None
+
+        # Validate related objects
+        if not all([sef, profesor, materie, asistent, sala]):
+            return {"message": "Related data not found for exam"}, 404
+
+        # Prepare response
+        examen_data = {
+            "id": examen.id,
+            "sef": {
+                "id": sef.id,
+                "nume": sef.nume,
+                "telefon": sef.telefon,
+                "facultatea": sef.facultatea,
+                "specializarea": sef.specializarea,
+                "idgrupa": sef.idgrupa
+            },
+            "profesor": {
+                "id": profesor.id,
+                "nume": profesor.nume,
+                "telefon": profesor.telefon
+            },
+            "materie": {
+                "id": materie.id,
+                "nume": materie.nume,
+                "credite": materie.numarcredite,
+                "abreviere": materie.abreviere,
+                "tipevaluare": materie.tipevaluare
+            },
+            "data": examen.data.strftime("%Y-%m-%d"),  # Format the date as a string
+            "starea": examen.starea,
+            "orastart": examen.orastart.strftime("%H:%M"),  # Format time as HH:MM
+            "orafinal": examen.orafinal.strftime("%H:%M"),  # Format time as HH:MM
+            "asistent": {
+                "id": asistent.id,
+                "nume": asistent.nume,
+                "telefon": asistent.telefon
+            },
+            "sala": {
+                "id": sala.id,
+                "nume": sala.nume,
+                "cladire": sala.cladire,
+                "abreviere": sala.abreviere
+            }
+        }
+
+        return examen_data, 200
+
+    except Exception as e:
+        return {"message": f"Unexpected error: {str(e)}"}, 500
+
+    finally:
+        session.close()
 
 
 
