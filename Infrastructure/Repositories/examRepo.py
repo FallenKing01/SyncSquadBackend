@@ -702,7 +702,7 @@ def delete_examen_programat_repo(examen_id, data):
 from sqlalchemy.exc import SQLAlchemyError
 
 
-def get_info_examen_repo(id: int) -> tuple[dict, int]:
+def get_info_examen_repo(id: int):
     """
     Retrieves detailed information about an exam by its ID.
 
