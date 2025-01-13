@@ -155,16 +155,16 @@ class deleteExamen(Resource):
 
             abort(500, "Something went wrong")
 
-@nsExamen.route("/getexameninfo/<string:examenId>")
-class getExamenInfo(Resource):
-    def get(self, examenId):
-
-        try:
-
-            examen = get_info_examen_repo(examenId)
-
-            return examen
-
-        except Exception:
-
-            abort(500, "Something went wrong")
+# @nsExamen.route("/getexameninfo/<string:examenId>")
+# class getExamenInfo(Resource):
+#     def get(self, examenId):
+#
+#         try:
+#
+#             examen = get_info_examen_repo(examenId)
+#
+#             return examen
+#
+#         except Exception:
+#
+#             abort(500, "Something went wrong")
