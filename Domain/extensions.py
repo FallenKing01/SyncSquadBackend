@@ -14,8 +14,8 @@ authorizations = {
 
 url_object = URL.create(
     drivername="mssql+pyodbc",
-    username="student@syncsquad",
-    password="Suceava2024",
+    username="username",
+    password="dbpass",
     host="syncsquad.database.windows.net",
     port=1433,
     database="ipsync",
